@@ -87,7 +87,6 @@ function Login() {
                     <Input
                       data-testid="email-input"
                       placeholder=""
-                      type="email"
                       {...field}
                     />
                   </FormControl>
