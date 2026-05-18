@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   createFileRoute,
-  Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
@@ -23,11 +22,10 @@ import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 const formSchema = z.object({
-  username: z.email(),
+  username: z.string().max(32, { message: "ユーザーIDは32文字以内で入力してください" }),
   password: z
     .string()
-    .min(1, { message: "Password is required" })
-    .min(8, { message: "Password must be at least 8 characters" }),
+    .max(256, { message: "パスワードは256文字以内で入力してください" }),
 }) satisfies z.ZodType<AccessToken>
 
 type FormData = z.infer<typeof formSchema>
@@ -44,7 +42,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       {
-        title: "Log In - FastAPI Template",
+        title: "ログイン",
       },
     ],
   }),
@@ -75,7 +73,7 @@ function Login() {
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Login to your account</h1>
+            <h1 className="text-2xl font-bold">ログイン</h1>
           </div>
 
           <div className="grid gap-4">
@@ -84,11 +82,11 @@ function Login() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>ID</FormLabel>
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="user@example.com"
+                      placeholder=""
                       type="email"
                       {...field}
                     />
@@ -103,19 +101,11 @@ function Login() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center">
-                    <FormLabel>Password</FormLabel>
-                    <RouterLink
-                      to="/recover-password"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </RouterLink>
-                  </div>
+                  <FormLabel>password</FormLabel>
                   <FormControl>
                     <PasswordInput
                       data-testid="password-input"
-                      placeholder="Password"
+                      placeholder=""
                       {...field}
                     />
                   </FormControl>
@@ -125,15 +115,8 @@ function Login() {
             />
 
             <LoadingButton type="submit" loading={loginMutation.isPending}>
-              Log In
+              ログイン
             </LoadingButton>
-          </div>
-
-          <div className="text-center text-sm">
-            Don't have an account yet?{" "}
-            <RouterLink to="/signup" className="underline underline-offset-4">
-              Sign up
-            </RouterLink>
           </div>
         </form>
       </Form>
