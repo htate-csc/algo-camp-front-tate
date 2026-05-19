@@ -94,7 +94,6 @@ const AddUser = () => {
       <DialogTrigger asChild>
         <Button className="my-4">
           <Plus className="mr-2" />
-          Add User
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

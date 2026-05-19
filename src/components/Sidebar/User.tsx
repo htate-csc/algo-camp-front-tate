@@ -18,14 +18,14 @@ export function User({ user }: { user: any }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              data-testid="user-menu"
-              onClick={handleLogout}
-            >
-              Log Out
-            </SidebarMenuButton>
+        <SidebarMenuButton
+          size="lg"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          data-testid="user-menu"
+          onClick={handleLogout}
+        >
+          Log Out
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   )
