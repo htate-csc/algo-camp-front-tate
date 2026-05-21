@@ -1,5 +1,13 @@
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { Search } from "lucide-react"
+import { Suspense } from "react"
+
+import { ProblemsService } from "@/client"
+import { DataTable } from "@/components/Common/DataTable"
+import AddProblem from "@/components/Problem/AddProblem"
+import { columns } from "@/components/Problem/columns"
+import PendingItems from "@/components/Pending/PendingItems"
 
 export const Route = createFileRoute("/_layout/problem")({
   component: Problems,
@@ -12,6 +20,35 @@ export const Route = createFileRoute("/_layout/problem")({
   }),
 })
 
+function getProblemsQueryOptions() {
+  return {
+    queryFn: () => ProblemsService.readProblems({ skip: 0, limit: 100 }),
+    queryKey: ["problems"],
+  }
+}
+
+function ProblemsContent() {
+  const { data: problems } = useSuspenseQuery(getProblemsQueryOptions())
+
+  if (problems.data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-24 border rounded-lg bg-card">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <Search className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold">問題が登録されていません</h3>
+        <p className="text-muted-foreground">新しい問題を追加して開始しましょう</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <DataTable columns={columns} data={problems.data} />
+    </div>
+  )
+}
+
 function Problems() {
   return (
     <div className="flex flex-col gap-6">
@@ -19,15 +56,11 @@ function Problems() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">問題管理</h1>
         </div>
+        <AddProblem />
       </div>
-      
-      <div className="flex flex-col items-center justify-center text-center py-24 border rounded-lg bg-card">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <Search className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-semibold">問題管理画面</h3>
-        <p className="text-muted-foreground">この機能は現在実装予定です。</p>
-      </div>
+      <Suspense fallback={<PendingItems />}>
+        <ProblemsContent />
+      </Suspense>
     </div>
   )
 }

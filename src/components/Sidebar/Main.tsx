@@ -1,5 +1,4 @@
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
-import type { LucideIcon } from "lucide-react"
 
 import {
   SidebarGroup,
@@ -11,7 +10,6 @@ import {
 } from "@/components/ui/sidebar"
 
 export type Item = {
-  icon: LucideIcon
   title: string
   path: string
 }
@@ -46,7 +44,6 @@ export function Main({ items }: MainProps) {
                   asChild
                 >
                   <RouterLink to={item.path} onClick={handleMenuClick}>
-                    <item.icon />
                     <span>{item.title}</span>
                   </RouterLink>
                 </SidebarMenuButton>

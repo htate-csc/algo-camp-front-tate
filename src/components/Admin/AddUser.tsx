@@ -93,7 +93,7 @@ const AddUser = () => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="my-4">
-          <Plus className="mr-2" />
+          <Plus/>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

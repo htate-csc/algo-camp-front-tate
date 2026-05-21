@@ -1,5 +1,3 @@
-import { Briefcase, Home, Users } from "lucide-react"
-
 import { Logo } from "@/components/Common/Logo"
 import {
   Sidebar,
@@ -12,15 +10,15 @@ import { type Item, Main } from "./Main"
 import { User } from "./User"
 
 const baseItems: Item[] = [
-  { icon: Home, title: "コンテスト管理", path: "/" },
-  { icon: Briefcase, title: "問題管理", path: "/items" },
+  { title: "コンテスト管理", path: "/" },
+  { title: "問題管理", path: "/problem" },
 ]
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
 
   const items = currentUser?.is_superuser
-    ? [...baseItems, { icon: Users, title: "ユーザ管理", path: "/admin" }]
+    ? [...baseItems, { title: "ユーザ管理", path: "/admin" }]
     : baseItems
 
   return (
