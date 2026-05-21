@@ -1,76 +1,90 @@
 import type { ColumnDef } from "@tanstack/react-table"
+import type { ContestPublic } from "@/client"
+import EditContest from "./EditContest"
+import DeleteContest from "./DeleteContest"
 
-import type { UserPublic } from "@/client"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { UserActionsMenu } from "./UserActionsMenu"
-
-export type UserTableData = UserPublic & {
-  isCurrentUser: boolean
+// 日時をフォーマットするヘルパー関数
+const formatDateTime = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return "N/A"
+  try {
+    return new Date(dateStr).toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  } catch {
+    return "N/A"
+  }
 }
 
-export const columns: ColumnDef<UserTableData>[] = [
+// 1. 予定されているコンテスト用のカラム定義 (5列)
+export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   {
-    accessorKey: "full_name",
-    header: "ユーザ名",
-    cell: ({ row }) => {
-      const fullName = row.original.full_name
-      return (
-        <div className="flex items-center gap-2">
-          <span
-            className={cn("font-medium", !fullName && "text-muted-foreground")}
-          >
-            {fullName || "N/A"}
-          </span>
-          {row.original.isCurrentUser && (
-            <Badge variant="outline" className="text-xs">
-              You
-            </Badge>
-          )}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "email",
-    header: "ログインID",
+    accessorKey: "title",
+    header: "コンテスト名",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email}</span>
+      <span className="font-semibold text-foreground">{row.original.title}</span>
     ),
   },
   {
-    accessorKey: "is_superuser",
-    header: "アクション",
+    accessorKey: "start_at",
+    header: "開催日時",
     cell: ({ row }) => (
-      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
-        {row.original.is_superuser ? "Superuser" : "User"}
-      </Badge>
+      <span className="text-muted-foreground">{formatDateTime(row.original.start_at)}</span>
     ),
   },
   {
-    accessorKey: "is_active",
-    header: "",
+    accessorKey: "end_at",
+    header: "終了日時",
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "size-2 rounded-full",
-            row.original.is_active ? "bg-green-500" : "bg-gray-400",
-          )}
-        />
-        <span className={row.original.is_active ? "" : "text-muted-foreground"}>
-          {row.original.is_active ? "Active" : "Inactive"}
-        </span>
-      </div>
+      <span className="text-muted-foreground">{formatDateTime(row.original.end_at)}</span>
     ),
   },
   {
     id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
+    header: "アクション",
     cell: ({ row }) => (
-      <div className="flex justify-end">
-        <UserActionsMenu user={row.original} />
+      <div className="flex justify-start">
+        <EditContest contest={row.original} />
       </div>
+    ),
+  },
+  {
+    id: "delete",
+    header: "",
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <DeleteContest id={row.original.id} />
+      </div>
+    ),
+    size: 40,
+  },
+]
+
+// 2. 実施中および終了したコンテスト用のカラム定義 (3列)
+// コンテスト名は表示するが、ヘッダーの列名は表示しない。開催日時と終了日時だけヘッダーに表示する。
+export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
+  {
+    accessorKey: "title",
+    header: "", // 列名は表示しない
+    cell: ({ row }) => (
+      <span className="font-semibold text-foreground">{row.original.title}</span>
+    ),
+  },
+  {
+    accessorKey: "start_at",
+    header: "開催日時",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">{formatDateTime(row.original.start_at)}</span>
+    ),
+  },
+  {
+    accessorKey: "end_at",
+    header: "終了日時",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">{formatDateTime(row.original.end_at)}</span>
     ),
   },
 ]

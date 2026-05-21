@@ -5,9 +5,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type UserCreate, UsersService } from "@/client"
+import { ContestsService, type ContestCreate } from "@/client"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogClose,
@@ -33,26 +32,25 @@ import { handleError } from "@/utils"
 
 const formSchema = z
   .object({
-    email: z.email({ message: "Invalid email address" }),
-    full_name: z.string().optional(),
-    password: z
-      .string()
-      .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be at least 8 characters" }),
-    confirm_password: z
-      .string()
-      .min(1, { message: "Please confirm your password" }),
-    is_superuser: z.boolean(),
-    is_active: z.boolean(),
+    title: z.string().min(1, { message: "コンテスト名は必須です" }),
+    start_at: z.string().min(1, { message: "開催日時は必須です" }),
+    end_at: z.string().min(1, { message: "終了日時は必須です" }),
   })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "The passwords don't match",
-    path: ["confirm_password"],
-  })
+  .refine(
+    (data) => {
+      const start = new Date(data.start_at).getTime()
+      const end = new Date(data.end_at).getTime()
+      return end > start
+    },
+    {
+      message: "終了日時は開催日時より後の時間である必要があります",
+      path: ["end_at"],
+    },
+  )
 
 type FormData = z.infer<typeof formSchema>
 
-const AddUser = () => {
+const AddContest = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -62,45 +60,48 @@ const AddUser = () => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      email: "",
-      full_name: "",
-      password: "",
-      confirm_password: "",
-      is_superuser: false,
-      is_active: false,
+      title: "",
+      start_at: "",
+      end_at: "",
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UserCreate) =>
-      UsersService.createUser({ requestBody: data }),
+    mutationFn: (data: ContestCreate) =>
+      ContestsService.createContest({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("User created successfully")
+      showSuccessToast("コンテストを作成しました")
       form.reset()
       setIsOpen(false)
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] })
+      queryClient.invalidateQueries({ queryKey: ["contests"] })
     },
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    // datetime-local の値を ISO 8601 形式に変換
+    const submitData: ContestCreate = {
+      title: data.title,
+      start_at: new Date(data.start_at).toISOString(),
+      end_at: new Date(data.end_at).toISOString(),
+    }
+    mutation.mutate(submitData)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="my-4">
-          <Plus className="mr-2" />
+          <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add User</DialogTitle>
+          <DialogTitle>コンテスト追加</DialogTitle>
           <DialogDescription>
-            Fill in the form below to add a new user to the system.
+            新しいコンテストの情報を入力してください。
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -108,16 +109,16 @@ const AddUser = () => {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      コンテスト名 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Email"
-                        type="email"
+                        placeholder="コンテスト名を入力"
+                        type="text"
                         {...field}
                         required
                       />
@@ -129,30 +130,15 @@ const AddUser = () => {
 
               <FormField
                 control={form.control}
-                name="full_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Full name" type="text" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
+                name="start_at"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Set Password <span className="text-destructive">*</span>
+                      開催日時 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
-                        type="password"
+                        type="datetime-local"
                         {...field}
                         required
                       />
@@ -164,54 +150,20 @@ const AddUser = () => {
 
               <FormField
                 control={form.control}
-                name="confirm_password"
+                name="end_at"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Confirm Password{" "}
-                      <span className="text-destructive">*</span>
+                      終了日時 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
-                        type="password"
+                        type="datetime-local"
                         {...field}
                         required
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
                   </FormItem>
                 )}
               />
@@ -219,12 +171,12 @@ const AddUser = () => {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" disabled={mutation.isPending}>
-                  Cancel
+                <Button variant="outline" type="button" disabled={mutation.isPending}>
+                  キャンセル
                 </Button>
               </DialogClose>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                Save
+                保存
               </LoadingButton>
             </DialogFooter>
           </form>
@@ -234,4 +186,4 @@ const AddUser = () => {
   )
 }
 
-export default AddUser
+export default AddContest
