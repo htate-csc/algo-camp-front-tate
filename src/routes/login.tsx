@@ -1,8 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -22,7 +19,9 @@ import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 const formSchema = z.object({
-  username: z.string().max(32, { message: "ユーザーIDは32文字以内で入力してください" }),
+  username: z
+    .string()
+    .max(32, { message: "ユーザーIDは32文字以内で入力してください" }),
   password: z
     .string()
     .max(256, { message: "パスワードは256文字以内で入力してください" }),

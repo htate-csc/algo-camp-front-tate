@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
 import { Search } from "lucide-react"
 import { Suspense } from "react"
 
@@ -26,7 +26,6 @@ function getItemsQueryOptions() {
     queryKey: ["items"],
   }
 }
-
 
 function ItemsTableContent() {
   const { data: items } = useSuspenseQuery(getItemsQueryOptions())

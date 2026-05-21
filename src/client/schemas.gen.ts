@@ -57,21 +57,7 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
-export const HTTPValidationErrorSchema = {
-    properties: {
-        detail: {
-            items: {
-                '$ref': '#/components/schemas/ValidationError'
-            },
-            type: 'array',
-            title: 'Detail'
-        }
-    },
-    type: 'object',
-    title: 'HTTPValidationError'
-} as const;
-
-export const ItemCreateSchema = {
+export const ContestCreateSchema = {
     properties: {
         title: {
             type: 'string',
@@ -79,53 +65,146 @@ export const ItemCreateSchema = {
             minLength: 1,
             title: 'Title'
         },
-        description: {
+        start_at: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255
+                    format: 'date-time'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Description'
+            title: 'Start At'
+        },
+        end_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End At'
         }
     },
     type: 'object',
-    required: ['title'],
-    title: 'ItemCreate'
+    required: ['title', 'start_at', 'end_at'],
+    title: 'ContestCreate'
 } as const;
 
-export const ItemPublicSchema = {
+export const ContestProblemsCreateSchema = {
     properties: {
-        title: {
+        problem_id: {
             type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
+            format: 'uuid',
+            title: 'Problem Id'
         },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
+        contest_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Contest Id'
+        },
+        order_num: {
+            type: 'integer',
+            title: 'Order Num',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['problem_id', 'contest_id'],
+    title: 'ContestProblemsCreate'
+} as const;
+
+export const ContestProblemsPublicSchema = {
+    properties: {
+        problem_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Problem Id'
+        },
+        contest_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Contest Id'
+        },
+        order_num: {
+            type: 'integer',
+            title: 'Order Num',
+            default: 0
         },
         id: {
             type: 'string',
             format: 'uuid',
             title: 'Id'
-        },
-        owner_id: {
+        }
+    },
+    type: 'object',
+    required: ['problem_id', 'contest_id', 'id'],
+    title: 'ContestProblemsPublic'
+} as const;
+
+export const ContestProblemsUpdateSchema = {
+    properties: {
+        problem_id: {
             type: 'string',
             format: 'uuid',
-            title: 'Owner Id'
+            title: 'Problem Id'
+        },
+        contest_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Contest Id'
+        },
+        order_num: {
+            type: 'integer',
+            title: 'Order Num',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['problem_id', 'contest_id'],
+    title: 'ContestProblemsUpdate'
+} as const;
+
+export const ContestPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        start_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start At'
+        },
+        end_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End At'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
         },
         created_at: {
             anyOf: [
@@ -138,50 +217,68 @@ export const ItemPublicSchema = {
                 }
             ],
             title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
         }
     },
     type: 'object',
-    required: ['title', 'id', 'owner_id'],
-    title: 'ItemPublic'
+    required: ['title', 'start_at', 'end_at', 'id'],
+    title: 'ContestPublic'
 } as const;
 
-export const ItemUpdateSchema = {
+export const ContestUpdateSchema = {
     properties: {
         title: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
             title: 'Title'
         },
-        description: {
+        start_at: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255
+                    format: 'date-time'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Description'
+            title: 'Start At'
+        },
+        end_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End At'
         }
     },
     type: 'object',
-    title: 'ItemUpdate'
+    required: ['title', 'start_at', 'end_at'],
+    title: 'ContestUpdate'
 } as const;
 
-export const ItemsPublicSchema = {
+export const ContestsPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/ItemPublic'
+                '$ref': '#/components/schemas/ContestPublic'
             },
             type: 'array',
             title: 'Data'
@@ -193,7 +290,21 @@ export const ItemsPublicSchema = {
     },
     type: 'object',
     required: ['data', 'count'],
-    title: 'ItemsPublic'
+    title: 'ContestsPublic'
+} as const;
+
+export const HTTPValidationErrorSchema = {
+    properties: {
+        detail: {
+            items: {
+                '$ref': '#/components/schemas/ValidationError'
+            },
+            type: 'array',
+            title: 'Detail'
+        }
+    },
+    type: 'object',
+    title: 'HTTPValidationError'
 } as const;
 
 export const MessageSchema = {
@@ -249,6 +360,263 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const ProblemCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        time_limit: {
+            type: 'string',
+            title: 'Time Limit'
+        },
+        memory_limit: {
+            type: 'integer',
+            title: 'Memory Limit'
+        },
+        content: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Content'
+        },
+        input_format: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Input Format'
+        },
+        output_format: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Output Format'
+        },
+        samples: {
+            items: {
+                '$ref': '#/components/schemas/TestCaseSample'
+            },
+            type: 'array',
+            maxItems: 3,
+            minItems: 3,
+            title: 'Samples'
+        }
+    },
+    type: 'object',
+    required: ['name', 'time_limit', 'memory_limit', 'content', 'input_format', 'output_format', 'samples'],
+    title: 'ProblemCreate'
+} as const;
+
+export const ProblemPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        time_limit: {
+            type: 'string',
+            title: 'Time Limit'
+        },
+        memory_limit: {
+            type: 'integer',
+            title: 'Memory Limit'
+        },
+        content: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Content'
+        },
+        input_format: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Input Format'
+        },
+        output_format: {
+            type: 'string',
+            maxLength: 1000,
+            minLength: 1,
+            title: 'Output Format'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        samples: {
+            items: {
+                '$ref': '#/components/schemas/TestCaseSample'
+            },
+            type: 'array',
+            title: 'Samples'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'time_limit', 'memory_limit', 'content', 'input_format', 'output_format', 'id', 'samples'],
+    title: 'ProblemPublic'
+} as const;
+
+export const ProblemUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        time_limit: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Time Limit'
+        },
+        memory_limit: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Memory Limit'
+        },
+        content: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Content'
+        },
+        input_format: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Input Format'
+        },
+        output_format: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Output Format'
+        },
+        samples: {
+            anyOf: [
+                {
+                    items: {
+                        '$ref': '#/components/schemas/TestCaseSample'
+                    },
+                    type: 'array',
+                    maxItems: 3,
+                    minItems: 3
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Samples'
+        }
+    },
+    type: 'object',
+    title: 'ProblemUpdate'
+} as const;
+
+export const ProblemsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProblemPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProblemsPublic'
+} as const;
+
+export const TestCaseSampleSchema = {
+    properties: {
+        input: {
+            type: 'string',
+            title: 'Input'
+        },
+        output: {
+            type: 'string',
+            title: 'Output'
+        }
+    },
+    type: 'object',
+    required: ['input', 'output'],
+    title: 'TestCaseSample'
 } as const;
 
 export const TokenSchema = {

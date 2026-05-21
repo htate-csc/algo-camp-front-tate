@@ -9,31 +9,53 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
-export type HTTPValidationError = {
-    detail?: Array<ValidationError>;
+export type ContestCreate = {
+    title: string;
+    start_at: (string | null);
+    end_at: (string | null);
 };
 
-export type ItemCreate = {
-    title: string;
-    description?: (string | null);
+export type ContestProblemsCreate = {
+    problem_id: string;
+    contest_id: string;
+    order_num?: number;
 };
 
-export type ItemPublic = {
-    title: string;
-    description?: (string | null);
+export type ContestProblemsPublic = {
+    problem_id: string;
+    contest_id: string;
+    order_num?: number;
     id: string;
-    owner_id: string;
-    created_at?: (string | null);
 };
 
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
+export type ContestProblemsUpdate = {
+    problem_id: string;
+    contest_id: string;
+    order_num?: number;
+};
+
+export type ContestPublic = {
+    title: string;
+    start_at: (string | null);
+    end_at: (string | null);
+    id: string;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type ContestsPublic = {
+    data: Array<ContestPublic>;
     count: number;
 };
 
-export type ItemUpdate = {
-    title?: (string | null);
-    description?: (string | null);
+export type ContestUpdate = {
+    title: string;
+    start_at: (string | null);
+    end_at: (string | null);
+};
+
+export type HTTPValidationError = {
+    detail?: Array<ValidationError>;
 };
 
 export type Message = {
@@ -50,6 +72,49 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type ProblemCreate = {
+    name: string;
+    time_limit: string;
+    memory_limit: number;
+    content: string;
+    input_format: string;
+    output_format: string;
+    samples: Array<TestCaseSample>;
+};
+
+export type ProblemPublic = {
+    name: string;
+    time_limit: string;
+    memory_limit: number;
+    content: string;
+    input_format: string;
+    output_format: string;
+    id: string;
+    samples: Array<TestCaseSample>;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type ProblemsPublic = {
+    data: Array<ProblemPublic>;
+    count: number;
+};
+
+export type ProblemUpdate = {
+    name?: (string | null);
+    time_limit?: (string | null);
+    memory_limit?: (number | null);
+    content?: (string | null);
+    input_format?: (string | null);
+    output_format?: (string | null);
+    samples?: (Array<TestCaseSample> | null);
+};
+
+export type TestCaseSample = {
+    input: string;
+    output: string;
 };
 
 export type Token = {
@@ -113,37 +178,56 @@ export type ValidationError = {
     };
 };
 
-export type ItemsReadItemsData = {
+export type ContestProblemsCreateContestProblemsData = {
+    requestBody: ContestProblemsCreate;
+};
+
+export type ContestProblemsCreateContestProblemsResponse = (ContestProblemsPublic);
+
+export type ContestProblemsUpdateContestProblemsData = {
+    id: string;
+    requestBody: ContestProblemsUpdate;
+};
+
+export type ContestProblemsUpdateContestProblemsResponse = (ContestProblemsPublic);
+
+export type ContestProblemsDeleteContestProblemsData = {
+    id: string;
+};
+
+export type ContestProblemsDeleteContestProblemsResponse = (Message);
+
+export type ContestsReadContestsData = {
     limit?: number;
     skip?: number;
 };
 
-export type ItemsReadItemsResponse = (ItemsPublic);
+export type ContestsReadContestsResponse = (ContestsPublic);
 
-export type ItemsCreateItemData = {
-    requestBody: ItemCreate;
+export type ContestsCreateContestData = {
+    requestBody: ContestCreate;
 };
 
-export type ItemsCreateItemResponse = (ItemPublic);
+export type ContestsCreateContestResponse = (ContestPublic);
 
-export type ItemsReadItemData = {
+export type ContestsReadContestData = {
     id: string;
 };
 
-export type ItemsReadItemResponse = (ItemPublic);
+export type ContestsReadContestResponse = (ContestPublic);
 
-export type ItemsUpdateItemData = {
+export type ContestsUpdateContestData = {
     id: string;
-    requestBody: ItemUpdate;
+    requestBody: ContestUpdate;
 };
 
-export type ItemsUpdateItemResponse = (ItemPublic);
+export type ContestsUpdateContestResponse = (ContestPublic);
 
-export type ItemsDeleteItemData = {
+export type ContestsDeleteContestData = {
     id: string;
 };
 
-export type ItemsDeleteItemResponse = (Message);
+export type ContestsDeleteContestResponse = (Message);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
@@ -176,6 +260,38 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProblemsReadProblemsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ProblemsReadProblemsResponse = (ProblemsPublic);
+
+export type ProblemsCreateProblemData = {
+    requestBody: ProblemCreate;
+};
+
+export type ProblemsCreateProblemResponse = (ProblemPublic);
+
+export type ProblemsReadProblemData = {
+    id: string;
+};
+
+export type ProblemsReadProblemResponse = (ProblemPublic);
+
+export type ProblemsUpdateProblemData = {
+    id: string;
+    requestBody: ProblemUpdate;
+};
+
+export type ProblemsUpdateProblemResponse = (ProblemPublic);
+
+export type ProblemsDeleteProblemData = {
+    id: string;
+};
+
+export type ProblemsDeleteProblemResponse = (Message);
 
 export type UsersReadUsersData = {
     limit?: number;

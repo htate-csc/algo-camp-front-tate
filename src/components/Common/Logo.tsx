@@ -18,16 +18,14 @@ export function Logo({
 
   const content =
     variant === "responsive" ? (
-      <>
-        <img
-          src={fullLogo}
-          alt="FastAPI"
-          className={cn(
-            "h-6 w-auto group-data-[collapsible=icon]:hidden",
-            className,
-          )}
-        />
-      </>
+      <img
+        src={fullLogo}
+        alt="FastAPI"
+        className={cn(
+          "h-6 w-auto group-data-[collapsible=icon]:hidden",
+          className,
+        )}
+      />
     ) : (
       <img
         src={variant === "full" ? fullLogo : iconLogo}

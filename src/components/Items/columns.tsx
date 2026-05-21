@@ -17,7 +17,7 @@ export const columns: ColumnDef<ItemPublic>[] = [
       <span className="font-medium">{row.original.title}</span>
     ),
   },
-    {
+  {
     accessorKey: "title",
     header: "メモリ制限",
     cell: ({ row }) => (

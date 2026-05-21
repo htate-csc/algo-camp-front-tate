@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 
-
 export function User({ user }: { user: any }) {
   const { logout } = useAuth()
 
