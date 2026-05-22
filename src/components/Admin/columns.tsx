@@ -3,7 +3,8 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { UserPublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { UserActionsMenu } from "./UserActionsMenu"
+import DeleteUser from "./DeleteUser"
+import EditUser from "./EditUser"
 
 export type UserTableData = UserPublic & {
   isCurrentUser: boolean
@@ -32,15 +33,15 @@ export const columns: ColumnDef<UserTableData>[] = [
     },
   },
   {
-    accessorKey: "email",
+    accessorKey: "login_id",
     header: "ログインID",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email}</span>
+      <span className="text-muted-foreground">{row.original.login_id}</span>
     ),
   },
   {
     accessorKey: "is_superuser",
-    header: "アクション",
+    header: "ロール",
     cell: ({ row }) => (
       <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
         {row.original.is_superuser ? "Superuser" : "User"}
@@ -48,29 +49,22 @@ export const columns: ColumnDef<UserTableData>[] = [
     ),
   },
   {
-    accessorKey: "is_active",
-    header: "",
+    id: "actions",
+    header: "アクション",
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "size-2 rounded-full",
-            row.original.is_active ? "bg-green-500" : "bg-gray-400",
-          )}
-        />
-        <span className={row.original.is_active ? "" : "text-muted-foreground"}>
-          {row.original.is_active ? "Active" : "Inactive"}
-        </span>
+      <div className="flex justify-start">
+        {!row.original.isCurrentUser && <EditUser user={row.original} />}
       </div>
     ),
   },
   {
-    id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
+    id: "delete",
+    header: "",
     cell: ({ row }) => (
-      <div className="flex justify-end">
-        <UserActionsMenu user={row.original} />
+      <div className="flex justify-center">
+        {!row.original.isCurrentUser && <DeleteUser id={row.original.id} />}
       </div>
     ),
+    size: 40,
   },
 ]

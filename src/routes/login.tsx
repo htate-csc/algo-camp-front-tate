@@ -24,7 +24,7 @@ import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 const formSchema = z.object({
   username: z
     .string()
-    .max(32, { message: "ユーザーIDは32文字以内で入力してください" }),
+    .max(255, { message: "ログインIDは255文字以内で入力してください" }),
   password: z
     .string()
     .max(256, { message: "パスワードは256文字以内で入力してください" }),
@@ -98,7 +98,7 @@ function Login() {
                   <FormLabel>ID</FormLabel>
                   <FormControl>
                     <Input
-                      data-testid="email-input"
+                      data-testid="login-id-input"
                       placeholder=""
                       {...field}
                     />

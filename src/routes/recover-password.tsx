@@ -25,7 +25,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  email: z.email(),
+  login_id: z.string().min(1, { message: "Login ID is required" }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -52,14 +52,14 @@ function RecoverPassword() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      login_id: "",
     },
   })
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({
-      email: data.email,
+      loginId: data.login_id,
     })
   }
 
@@ -91,15 +91,15 @@ function RecoverPassword() {
           <div className="grid gap-4">
             <FormField
               control={form.control}
-              name="email"
+              name="login_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Login ID</FormLabel>
                   <FormControl>
                     <Input
-                      data-testid="email-input"
-                      placeholder="user@example.com"
-                      type="email"
+                      data-testid="login-id-input"
+                      placeholder="Login ID"
+                      type="text"
                       {...field}
                     />
                   </FormControl>

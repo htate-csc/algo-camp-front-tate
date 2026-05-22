@@ -16,8 +16,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import {
   Form,
   FormControl,
@@ -33,7 +33,7 @@ import { handleError } from "@/utils"
 
 const formSchema = z
   .object({
-    email: z.email({ message: "Invalid email address" }),
+    login_id: z.string().min(1, { message: "Login ID is required" }),
     full_name: z.string().optional(),
     password: z
       .string()
@@ -42,7 +42,6 @@ const formSchema = z
       .or(z.literal("")),
     confirm_password: z.string().optional(),
     is_superuser: z.boolean().optional(),
-    is_active: z.boolean().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirm_password, {
     message: "The passwords don't match",
@@ -53,10 +52,9 @@ type FormData = z.infer<typeof formSchema>
 
 interface EditUserProps {
   user: UserPublic
-  onSuccess: () => void
 }
 
-const EditUser = ({ user, onSuccess }: EditUserProps) => {
+const EditUser = ({ user }: EditUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -66,10 +64,9 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      email: user.email,
+      login_id: user.login_id,
       full_name: user.full_name ?? undefined,
       is_superuser: user.is_superuser,
-      is_active: user.is_active,
     },
   })
 
@@ -79,7 +76,6 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
     onSuccess: () => {
       showSuccessToast("User updated successfully")
       setIsOpen(false)
-      onSuccess()
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
@@ -98,13 +94,12 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-      >
-        <Pencil />
-        Edit User
-      </DropdownMenuItem>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="flex items-center gap-1">
+          <Pencil className="h-3.5 w-3.5" />
+          Edit
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -117,16 +112,16 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="login_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      Login ID <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Email"
-                        type="email"
+                        placeholder="Login ID"
+                        type="text"
                         {...field}
                         required
                       />
@@ -198,22 +193,6 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                       />
                     </FormControl>
                     <FormLabel className="font-normal">Is superuser?</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
                   </FormItem>
                 )}
               />

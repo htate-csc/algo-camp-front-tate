@@ -68,7 +68,7 @@ export type NewPassword = {
 };
 
 export type PrivateUserCreate = {
-    email: string;
+    login_id: string;
     password: string;
     full_name: string;
     is_verified?: boolean;
@@ -128,16 +128,14 @@ export type UpdatePassword = {
 };
 
 export type UserCreate = {
-    email: string;
-    is_active?: boolean;
+    login_id: string;
     is_superuser?: boolean;
     full_name?: (string | null);
     password: string;
 };
 
 export type UserPublic = {
-    email: string;
-    is_active?: boolean;
+    login_id: string;
     is_superuser?: boolean;
     full_name?: (string | null);
     id: string;
@@ -145,7 +143,7 @@ export type UserPublic = {
 };
 
 export type UserRegister = {
-    email: string;
+    login_id: string;
     password: string;
     full_name?: (string | null);
 };
@@ -156,8 +154,7 @@ export type UsersPublic = {
 };
 
 export type UserUpdate = {
-    email?: (string | null);
-    is_active?: boolean;
+    login_id?: (string | null);
     is_superuser?: boolean;
     full_name?: (string | null);
     password?: (string | null);
@@ -165,7 +162,7 @@ export type UserUpdate = {
 
 export type UserUpdateMe = {
     full_name?: (string | null);
-    email?: (string | null);
+    login_id?: (string | null);
 };
 
 export type ValidationError = {
@@ -239,7 +236,7 @@ export type LoginLoginAccessTokenResponse = (Token);
 export type LoginTestTokenResponse = (UserPublic);
 
 export type LoginRecoverPasswordData = {
-    email: string;
+    loginId: string;
 };
 
 export type LoginRecoverPasswordResponse = (Message);
@@ -251,7 +248,7 @@ export type LoginResetPasswordData = {
 export type LoginResetPasswordResponse = (Message);
 
 export type LoginRecoverPasswordHtmlContentData = {
-    email: string;
+    loginId: string;
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);

@@ -13,18 +13,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 interface DeleteUserProps {
   id: string
-  onSuccess: () => void
 }
 
-const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
+const DeleteUser = ({ id }: DeleteUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -39,7 +38,6 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
     onSuccess: () => {
       showSuccessToast("The user was deleted successfully")
       setIsOpen(false)
-      onSuccess()
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
@@ -53,14 +51,15 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuItem
-        variant="destructive"
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-      >
-        <Trash2 />
-        Delete User
-      </DropdownMenuItem>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>

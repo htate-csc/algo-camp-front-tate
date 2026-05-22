@@ -33,7 +33,7 @@ import { handleError } from "@/utils"
 
 const formSchema = z
   .object({
-    email: z.email({ message: "Invalid email address" }),
+    login_id: z.string().min(1, { message: "Login ID is required" }),
     full_name: z.string().optional(),
     password: z
       .string()
@@ -43,7 +43,6 @@ const formSchema = z
       .string()
       .min(1, { message: "Please confirm your password" }),
     is_superuser: z.boolean(),
-    is_active: z.boolean(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "The passwords don't match",
@@ -62,12 +61,11 @@ const AddUser = () => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      email: "",
+      login_id: "",
       full_name: "",
       password: "",
       confirm_password: "",
       is_superuser: false,
-      is_active: false,
     },
   })
 
@@ -86,7 +84,8 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    const { confirm_password, ...userCreate } = data
+    mutation.mutate(userCreate)
   }
 
   return (
@@ -108,16 +107,16 @@ const AddUser = () => {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="login_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      Login ID <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Email"
-                        type="email"
+                        placeholder="Login ID"
+                        type="text"
                         {...field}
                         required
                       />
@@ -196,22 +195,6 @@ const AddUser = () => {
                       />
                     </FormControl>
                     <FormLabel className="font-normal">Is superuser?</FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
                   </FormItem>
                 )}
               />

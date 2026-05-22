@@ -23,7 +23,7 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   full_name: z.string().max(30).optional(),
-  email: z.email({ message: "Invalid email address" }),
+  login_id: z.string().min(1, { message: "Login ID is required" }),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -40,7 +40,7 @@ const UserInformation = () => {
     criteriaMode: "all",
     defaultValues: {
       full_name: currentUser?.full_name ?? undefined,
-      email: currentUser?.email,
+      login_id: currentUser?.login_id,
     },
   })
 
@@ -68,8 +68,8 @@ const UserInformation = () => {
     if (data.full_name !== currentUser?.full_name) {
       updateData.full_name = data.full_name
     }
-    if (data.email !== currentUser?.email) {
-      updateData.email = data.email
+    if (data.login_id !== currentUser?.login_id) {
+      updateData.login_id = data.login_id
     }
 
     mutation.mutate(updateData)
@@ -118,19 +118,19 @@ const UserInformation = () => {
 
           <FormField
             control={form.control}
-            name="email"
+            name="login_id"
             render={({ field }) =>
               editMode ? (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Login ID</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               ) : (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Login ID</FormLabel>
                   <p className="py-2 truncate max-w-sm">{field.value}</p>
                 </FormItem>
               )

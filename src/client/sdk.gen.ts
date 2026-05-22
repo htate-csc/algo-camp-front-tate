@@ -223,16 +223,16 @@ export class LoginService {
      * Recover Password
      * Password Recovery
      * @param data The data for the request.
-     * @param data.email
+     * @param data.loginId
      * @returns Message Successful Response
      * @throws ApiError
      */
     public static recoverPassword(data: LoginRecoverPasswordData): CancelablePromise<LoginRecoverPasswordResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/password-recovery/{email}',
+            url: '/api/v1/password-recovery/{login_id}',
             path: {
-                email: data.email
+                login_id: data.loginId
             },
             errors: {
                 422: 'Validation Error'
@@ -264,16 +264,16 @@ export class LoginService {
      * Recover Password Html Content
      * HTML Content for Password Recovery
      * @param data The data for the request.
-     * @param data.email
+     * @param data.loginId
      * @returns string Successful Response
      * @throws ApiError
      */
     public static recoverPasswordHtmlContent(data: LoginRecoverPasswordHtmlContentData): CancelablePromise<LoginRecoverPasswordHtmlContentResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/password-recovery-html-content/{email}',
+            url: '/api/v1/password-recovery-html-content/{login_id}',
             path: {
-                email: data.email
+                login_id: data.loginId
             },
             errors: {
                 422: 'Validation Error'

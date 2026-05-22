@@ -339,9 +339,9 @@ export const NewPasswordSchema = {
 
 export const PrivateUserCreateSchema = {
     properties: {
-        email: {
+        login_id: {
             type: 'string',
-            title: 'Email'
+            title: 'Login Id'
         },
         password: {
             type: 'string',
@@ -358,7 +358,7 @@ export const PrivateUserCreateSchema = {
         }
     },
     type: 'object',
-    required: ['email', 'password', 'full_name'],
+    required: ['login_id', 'password', 'full_name'],
     title: 'PrivateUserCreate'
 } as const;
 
@@ -658,16 +658,10 @@ export const UpdatePasswordSchema = {
 
 export const UserCreateSchema = {
     properties: {
-        email: {
+        login_id: {
             type: 'string',
             maxLength: 255,
-            format: 'email',
-            title: 'Email'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
+            title: 'Login Id'
         },
         is_superuser: {
             type: 'boolean',
@@ -694,22 +688,16 @@ export const UserCreateSchema = {
         }
     },
     type: 'object',
-    required: ['email', 'password'],
+    required: ['login_id', 'password'],
     title: 'UserCreate'
 } as const;
 
 export const UserPublicSchema = {
     properties: {
-        email: {
+        login_id: {
             type: 'string',
             maxLength: 255,
-            format: 'email',
-            title: 'Email'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
+            title: 'Login Id'
         },
         is_superuser: {
             type: 'boolean',
@@ -747,17 +735,16 @@ export const UserPublicSchema = {
         }
     },
     type: 'object',
-    required: ['email', 'id'],
+    required: ['login_id', 'id'],
     title: 'UserPublic'
 } as const;
 
 export const UserRegisterSchema = {
     properties: {
-        email: {
+        login_id: {
             type: 'string',
             maxLength: 255,
-            format: 'email',
-            title: 'Email'
+            title: 'Login Id'
         },
         password: {
             type: 'string',
@@ -779,29 +766,23 @@ export const UserRegisterSchema = {
         }
     },
     type: 'object',
-    required: ['email', 'password'],
+    required: ['login_id', 'password'],
     title: 'UserRegister'
 } as const;
 
 export const UserUpdateSchema = {
     properties: {
-        email: {
+        login_id: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255,
-                    format: 'email'
+                    maxLength: 255
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Email'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
+            title: 'Login Id'
         },
         is_superuser: {
             type: 'boolean',
@@ -852,18 +833,17 @@ export const UserUpdateMeSchema = {
             ],
             title: 'Full Name'
         },
-        email: {
+        login_id: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 255,
-                    format: 'email'
+                    maxLength: 255
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Email'
+            title: 'Login Id'
         }
     },
     type: 'object',
