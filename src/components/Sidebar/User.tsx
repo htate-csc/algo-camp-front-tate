@@ -23,7 +23,7 @@ export function User({ user }: { user: any }) {
           data-testid="user-menu"
           onClick={handleLogout}
         >
-          Log Out
+          ログアウト
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

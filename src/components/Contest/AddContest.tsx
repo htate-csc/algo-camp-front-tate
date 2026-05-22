@@ -1,11 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type ContestCreate, ContestsService } from "@/client"
+import {
+  type ContestCreate,
+  ContestProblemsService,
+  ContestsService,
+  ProblemsService,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -27,6 +32,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
@@ -35,6 +47,11 @@ const formSchema = z
     title: z.string().min(1, { message: "コンテスト名は必須です" }),
     start_at: z.string().min(1, { message: "開催日時は必須です" }),
     end_at: z.string().min(1, { message: "終了日時は必須です" }),
+    problems: z.array(
+      z.object({
+        problem_id: z.string().min(1, { message: "問題を選択してください" }),
+      }),
+    ),
   })
   .refine(
     (data) => {
@@ -55,6 +72,13 @@ const AddContest = () => {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
+  const { data: problemsData } = useQuery({
+    queryKey: ["problems"],
+    queryFn: () => ProblemsService.readProblems({ limit: 100 }),
+    enabled: isOpen,
+  })
+  const problems = problemsData?.data || []
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -63,12 +87,41 @@ const AddContest = () => {
       title: "",
       start_at: "",
       end_at: "",
+      problems: [],
     },
   })
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "problems",
+  })
+
   const mutation = useMutation({
-    mutationFn: (data: ContestCreate) =>
-      ContestsService.createContest({ requestBody: data }),
+    mutationFn: async (data: FormData) => {
+      const contestCreateData: ContestCreate = {
+        title: data.title,
+        start_at: new Date(data.start_at).toISOString(),
+        end_at: new Date(data.end_at).toISOString(),
+      }
+      const contest = await ContestsService.createContest({
+        requestBody: contestCreateData,
+      })
+
+      if (data.problems && data.problems.length > 0) {
+        await Promise.all(
+          data.problems.map((p, index) =>
+            ContestProblemsService.createContestProblems({
+              requestBody: {
+                contest_id: contest.id,
+                problem_id: p.problem_id,
+                order_num: index + 1,
+              },
+            }),
+          ),
+        )
+      }
+      return contest
+    },
     onSuccess: () => {
       showSuccessToast("コンテストを作成しました")
       form.reset()
@@ -81,13 +134,7 @@ const AddContest = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    // datetime-local の値を ISO 8601 形式に変換
-    const submitData: ContestCreate = {
-      title: data.title,
-      start_at: new Date(data.start_at).toISOString(),
-      end_at: new Date(data.end_at).toISOString(),
-    }
-    mutation.mutate(submitData)
+    mutation.mutate(data)
   }
 
   return (
@@ -97,7 +144,7 @@ const AddContest = () => {
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>コンテスト追加</DialogTitle>
           <DialogDescription>
@@ -159,6 +206,65 @@ const AddContest = () => {
                   </FormItem>
                 )}
               />
+
+              {/* コンテストで実施する問題 */}
+              <div className="space-y-2 mt-2">
+                <FormLabel className="text-sm font-medium">
+                  コンテストで実施する問題
+                </FormLabel>
+
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`problems.${index}.problem_id`}
+                      render={({ field: selectField }) => (
+                        <FormItem className="flex-1">
+                          <Select
+                            onValueChange={selectField.onChange}
+                            value={selectField.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="問題を選択" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {problems.map((prob) => (
+                                <SelectItem key={prob.id} value={prob.id}>
+                                  {prob.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => remove(index)}
+                      className="text-destructive hover:bg-destructive/10 cursor-pointer"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+
+                {/* 指定されたデザインの「+」ボタン */}
+                <div className="flex items-center gap-2 py-2">
+                  <button
+                    type="button"
+                    onClick={() => append({ problem_id: "" })}
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-[#3b82f6] hover:bg-[#2563eb] text-white cursor-pointer transition-colors shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+                </div>
+              </div>
             </div>
 
             <DialogFooter>

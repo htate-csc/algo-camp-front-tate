@@ -229,6 +229,14 @@ export const ContestPublicSchema = {
                 }
             ],
             title: 'Updated At'
+        },
+        problem_links: {
+            items: {
+                '$ref': '#/components/schemas/ContestProblemsPublic'
+            },
+            type: 'array',
+            title: 'Problem Links',
+            default: []
         }
     },
     type: 'object',

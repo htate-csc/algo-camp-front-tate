@@ -67,7 +67,7 @@ function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            開催中のコンテスト
+            開催中コンテスト一覧
           </h1>
         </div>
       </div>

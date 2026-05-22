@@ -18,7 +18,7 @@ export function AppSidebar() {
         { title: "問題管理", path: "/admin/problems" },
         { title: "ユーザ管理", path: "/admin/users" },
       ]
-    : [{ title: "開催中コンテスト", path: "/" }]
+    : [{ title: "コンテスト一覧", path: "/" }]
 
   return (
     <Sidebar collapsible="icon">
