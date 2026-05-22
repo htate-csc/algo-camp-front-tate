@@ -1,14 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
 import type { UserPublic } from "@/client"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import DeleteUser from "./DeleteUser"
 import EditUser from "./EditUser"
 
-export type UserTableData = UserPublic & {
-  isCurrentUser: boolean
-}
+export type UserTableData = UserPublic
 
 export const columns: ColumnDef<UserTableData>[] = [
   {
@@ -23,11 +20,6 @@ export const columns: ColumnDef<UserTableData>[] = [
           >
             {fullName || "N/A"}
           </span>
-          {row.original.isCurrentUser && (
-            <Badge variant="outline" className="text-xs">
-              You
-            </Badge>
-          )}
         </div>
       )
     },
@@ -40,20 +32,11 @@ export const columns: ColumnDef<UserTableData>[] = [
     ),
   },
   {
-    accessorKey: "is_superuser",
-    header: "ロール",
-    cell: ({ row }) => (
-      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
-        {row.original.is_superuser ? "Superuser" : "User"}
-      </Badge>
-    ),
-  },
-  {
     id: "actions",
     header: "アクション",
     cell: ({ row }) => (
       <div className="flex justify-start">
-        {!row.original.isCurrentUser && <EditUser user={row.original} />}
+        <EditUser user={row.original} />
       </div>
     ),
   },
@@ -62,7 +45,7 @@ export const columns: ColumnDef<UserTableData>[] = [
     header: "",
     cell: ({ row }) => (
       <div className="flex justify-center">
-        {!row.original.isCurrentUser && <DeleteUser id={row.original.id} />}
+        <DeleteUser id={row.original.id} />
       </div>
     ),
     size: 40,

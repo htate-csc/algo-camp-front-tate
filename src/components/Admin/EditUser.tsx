@@ -97,7 +97,7 @@ const EditUser = ({ user }: EditUserProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-1">
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          編集
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
