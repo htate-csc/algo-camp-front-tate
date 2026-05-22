@@ -1,9 +1,9 @@
 import { useSuspenseQueries } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Calendar } from "lucide-react"
-import { Suspense, useMemo } from "react"
+import { Suspense } from "react"
 
-import { type ContestPublic, ContestsService, UsersService } from "@/client"
+import { ContestsService, UsersService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import AddContest from "@/components/Contest/AddContest"
 import {
@@ -11,7 +11,6 @@ import {
   scheduledColumns,
 } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
-import useCurrentTime from "@/hooks/useCurrentTime"
 
 export const Route = createFileRoute("/_layout/admin/contests")({
   component: AdminContestsDashboard,
@@ -33,8 +32,6 @@ export const Route = createFileRoute("/_layout/admin/contests")({
 })
 
 function ContestsContent() {
-  const now = useCurrentTime()
-
   // 管理者専用ルートなので isSuperuser は常に true 扱い、全クエリを実行
   const results = useSuspenseQueries({
     queries: [
@@ -53,60 +50,9 @@ function ContestsContent() {
     ],
   })
 
-  const rawOngoing = results[0].data?.data ?? []
-  const rawScheduled = results[1].data?.data ?? []
-  const rawFinished = results[2].data?.data ?? []
-
-  const { scheduled, ongoing, finished } = useMemo(() => {
-    const scheduledList: ContestPublic[] = []
-    const ongoingList: ContestPublic[] = []
-    const finishedList: ContestPublic[] = []
-
-    for (const contest of rawScheduled) {
-      if (!contest.start_at || !contest.end_at) {
-        scheduledList.push(contest)
-        continue
-      }
-      const start = new Date(contest.start_at).getTime()
-      if (start > now) {
-        scheduledList.push(contest)
-      } else {
-        const end = new Date(contest.end_at).getTime()
-        if (end > now) {
-          ongoingList.push(contest)
-        } else {
-          finishedList.push(contest)
-        }
-      }
-    }
-
-    for (const contest of rawOngoing) {
-      if (!contest.start_at || !contest.end_at) {
-        ongoingList.push(contest)
-        continue
-      }
-      const start = new Date(contest.start_at).getTime()
-      const end = new Date(contest.end_at).getTime()
-
-      if (start <= now && end > now) {
-        ongoingList.push(contest)
-      } else if (end <= now) {
-        finishedList.push(contest)
-      } else if (start > now) {
-        scheduledList.push(contest)
-      }
-    }
-
-    for (const contest of rawFinished) {
-      finishedList.push(contest)
-    }
-
-    return {
-      scheduled: scheduledList,
-      ongoing: ongoingList,
-      finished: finishedList,
-    }
-  }, [rawOngoing, rawScheduled, rawFinished, now])
+  const ongoing = results[0].data?.data ?? []
+  const scheduled = results[1].data?.data ?? []
+  const finished = results[2].data?.data ?? []
 
   const totalContestsCount = scheduled.length + ongoing.length + finished.length
 

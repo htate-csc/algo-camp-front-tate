@@ -1,16 +1,23 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Calendar } from "lucide-react"
-import { Suspense, useMemo } from "react"
+import { Suspense } from "react"
 
-import { type ContestPublic, ContestsService } from "@/client"
+import { ContestsService, UsersService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { ongoingOrFinishedColumns } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
-import useCurrentTime from "@/hooks/useCurrentTime"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
+  beforeLoad: async () => {
+    const user = await UsersService.readUserMe()
+    if (user.is_superuser) {
+      throw redirect({
+        to: "/admin/contests",
+      })
+    }
+  },
   head: () => ({
     meta: [
       {
@@ -21,36 +28,13 @@ export const Route = createFileRoute("/_layout/")({
 })
 
 function ContestsContent() {
-  const now = useCurrentTime()
-
   // 一般向けページでは `ongoing` なコンテストのみ取得
   const { data: contestsData } = useSuspenseQuery({
     queryKey: ["contests", "ongoing"],
     queryFn: () => ContestsService.readContests({ status: "ongoing" }),
   })
 
-  const rawOngoing = contestsData?.data ?? []
-
-  // クライアント側で終了時刻を過ぎたものをリアルタイムに消去
-  const ongoing = useMemo(() => {
-    const ongoingList: ContestPublic[] = []
-
-    for (const contest of rawOngoing) {
-      if (!contest.start_at || !contest.end_at) {
-        ongoingList.push(contest)
-        continue
-      }
-      const start = new Date(contest.start_at).getTime()
-      const end = new Date(contest.end_at).getTime()
-
-      // 開始後かつ終了前のみ表示（終了時刻が来たら自動的に消える）
-      if (start <= now && end > now) {
-        ongoingList.push(contest)
-      }
-    }
-
-    return ongoingList
-  }, [rawOngoing, now])
+  const ongoing = contestsData?.data ?? []
 
   if (ongoing.length === 0) {
     return (
