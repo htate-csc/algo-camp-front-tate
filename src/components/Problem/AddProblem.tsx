@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import { useForm, type ControllerProps, type FieldPath } from "react-hook-form"
+import { type ControllerProps, type FieldPath, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { ProblemsService, type ProblemCreate } from "@/client"
+import { type ProblemCreate, ProblemsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -26,8 +26,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { Textarea } from "@/components/ui/textarea"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
@@ -125,7 +125,10 @@ const AddProblem = () => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 py-4"
+          >
             {/* 基本情報 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -137,7 +140,12 @@ const AddProblem = () => {
                       問題名 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="問題名を入力" type="text" {...field} required />
+                      <Input
+                        placeholder="問題名を入力"
+                        type="text"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,10 +158,16 @@ const AddProblem = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      実行時間制限 (ms) <span className="text-destructive">*</span>
+                      実行時間制限 (ms){" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="例: 2000" type="text" {...field} required />
+                      <Input
+                        placeholder="例: 2000"
+                        type="text"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -166,10 +180,16 @@ const AddProblem = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      メモリ制限 (GB) <span className="text-destructive">*</span>
+                      メモリ制限 (GB){" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="例: 1" type="text" {...field} required />
+                      <Input
+                        placeholder="例: 1"
+                        type="text"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -188,7 +208,12 @@ const AddProblem = () => {
                       問題文 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Textarea placeholder="問題文を入力してください" className="min-h-[120px]" {...field} required />
+                      <Textarea
+                        placeholder="問題文を入力してください"
+                        className="min-h-[120px]"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,10 +226,16 @@ const AddProblem = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      入力フォーマット <span className="text-destructive">*</span>
+                      入力フォーマット{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Textarea placeholder="入力形式を入力してください" className="min-h-[80px]" {...field} required />
+                      <Textarea
+                        placeholder="入力形式を入力してください"
+                        className="min-h-[80px]"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -217,10 +248,16 @@ const AddProblem = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      出力フォーマット <span className="text-destructive">*</span>
+                      出力フォーマット{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Textarea placeholder="出力形式を入力してください" className="min-h-[80px]" {...field} required />
+                      <Textarea
+                        placeholder="出力形式を入力してください"
+                        className="min-h-[80px]"
+                        {...field}
+                        required
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -230,11 +267,15 @@ const AddProblem = () => {
 
             {/* サンプル入出力 (3つ固定) */}
             <div className="space-y-4 border-t pt-4">
-              <h3 className="text-md font-semibold tracking-tight text-foreground">サンプル入出力 (3件固定)</h3>
-              
+              <h3 className="text-md font-semibold tracking-tight text-foreground">
+                サンプル入出力 (3件固定)
+              </h3>
+
               {/* サンプル 1 */}
               <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
-                <h4 className="text-sm font-medium text-foreground">サンプル 1</h4>
+                <h4 className="text-sm font-medium text-foreground">
+                  サンプル 1
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -243,7 +284,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>入力例 1</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="入力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="入力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -256,7 +301,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>出力例 1</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="出力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="出力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -267,7 +316,9 @@ const AddProblem = () => {
 
               {/* サンプル 2 */}
               <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
-                <h4 className="text-sm font-medium text-foreground">サンプル 2</h4>
+                <h4 className="text-sm font-medium text-foreground">
+                  サンプル 2
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -276,7 +327,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>入力例 2</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="入力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="入力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -289,7 +344,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>出力例 2</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="出力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="出力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -300,7 +359,9 @@ const AddProblem = () => {
 
               {/* サンプル 3 */}
               <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
-                <h4 className="text-sm font-medium text-foreground">サンプル 3</h4>
+                <h4 className="text-sm font-medium text-foreground">
+                  サンプル 3
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -309,7 +370,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>入力例 3</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="入力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="入力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -322,7 +387,11 @@ const AddProblem = () => {
                       <FormItem>
                         <FormLabel>出力例 3</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="出力例を入力" className="min-h-[70px] font-mono text-xs" {...field} />
+                          <Textarea
+                            placeholder="出力例を入力"
+                            className="min-h-[70px] font-mono text-xs"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -334,7 +403,11 @@ const AddProblem = () => {
 
             <DialogFooter className="border-t pt-4">
               <DialogClose asChild>
-                <Button variant="outline" type="button" disabled={mutation.isPending}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={mutation.isPending}
+                >
                   キャンセル
                 </Button>
               </DialogClose>

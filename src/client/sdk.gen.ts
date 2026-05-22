@@ -77,6 +77,7 @@ export class ContestsService {
      * Read Contests
      * Retrieve Contests.
      * @param data The data for the request.
+     * @param data.status
      * @param data.skip
      * @param data.limit
      * @returns ContestsPublic Successful Response
@@ -87,6 +88,7 @@ export class ContestsService {
             method: 'GET',
             url: '/api/v1/contests/',
             query: {
+                status: data.status,
                 skip: data.skip,
                 limit: data.limit
             },

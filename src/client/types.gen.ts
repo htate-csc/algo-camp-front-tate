@@ -200,6 +200,7 @@ export type ContestProblemsDeleteContestProblemsResponse = (Message);
 export type ContestsReadContestsData = {
     limit?: number;
     skip?: number;
+    status?: (string | null);
 };
 
 export type ContestsReadContestsResponse = (ContestsPublic);

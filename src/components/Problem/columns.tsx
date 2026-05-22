@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import type { ProblemPublic } from "@/client"
-import EditProblem from "./EditProblem"
 import DeleteProblem from "./DeleteProblem"
+import EditProblem from "./EditProblem"
 
 export const columns: ColumnDef<ProblemPublic>[] = [
   {
@@ -15,14 +15,18 @@ export const columns: ColumnDef<ProblemPublic>[] = [
     accessorKey: "time_limit",
     header: "実行時間制限",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.time_limit} ms</span>
+      <span className="text-muted-foreground">
+        {row.original.time_limit} ms
+      </span>
     ),
   },
   {
     accessorKey: "memory_limit",
     header: "メモリ制限",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.memory_limit} GB</span>
+      <span className="text-muted-foreground">
+        {row.original.memory_limit} GB
+      </span>
     ),
   },
   {

@@ -61,7 +61,8 @@ const DeleteProblem = ({ id }: DeleteProblemProps) => {
           <DialogHeader>
             <DialogTitle>問題の削除</DialogTitle>
             <DialogDescription>
-              この問題を<strong>永久に削除</strong>しますか？ この操作は取り消せません。
+              この問題を<strong>永久に削除</strong>しますか？
+              この操作は取り消せません。
             </DialogDescription>
           </DialogHeader>
 

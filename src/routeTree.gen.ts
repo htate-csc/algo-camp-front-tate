@@ -15,8 +15,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
-import { Route as LayoutProblemRouteImport } from './routes/_layout/problem'
-import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutAdminUsersRouteImport } from './routes/_layout/admin.users'
+import { Route as LayoutAdminProblemsRouteImport } from './routes/_layout/admin.problems'
+import { Route as LayoutAdminContestsRouteImport } from './routes/_layout/admin.contests'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -47,14 +48,19 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutProblemRoute = LayoutProblemRouteImport.update({
-  id: '/problem',
-  path: '/problem',
+const LayoutAdminUsersRoute = LayoutAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutAdminRoute = LayoutAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const LayoutAdminProblemsRoute = LayoutAdminProblemsRouteImport.update({
+  id: '/admin/problems',
+  path: '/admin/problems',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutAdminContestsRoute = LayoutAdminContestsRouteImport.update({
+  id: '/admin/contests',
+  path: '/admin/contests',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -63,18 +69,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/admin': typeof LayoutAdminRoute
-  '/problem': typeof LayoutProblemRoute
   '/settings': typeof LayoutSettingsRoute
+  '/admin/contests': typeof LayoutAdminContestsRoute
+  '/admin/problems': typeof LayoutAdminProblemsRoute
+  '/admin/users': typeof LayoutAdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/admin': typeof LayoutAdminRoute
-  '/problem': typeof LayoutProblemRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/admin/contests': typeof LayoutAdminContestsRoute
+  '/admin/problems': typeof LayoutAdminProblemsRoute
+  '/admin/users': typeof LayoutAdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,10 +90,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_layout/admin': typeof LayoutAdminRoute
-  '/_layout/problem': typeof LayoutProblemRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/admin/contests': typeof LayoutAdminContestsRoute
+  '/_layout/admin/problems': typeof LayoutAdminProblemsRoute
+  '/_layout/admin/users': typeof LayoutAdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,28 +103,31 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/reset-password'
-    | '/admin'
-    | '/problem'
     | '/settings'
+    | '/admin/contests'
+    | '/admin/problems'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/recover-password'
     | '/reset-password'
-    | '/admin'
-    | '/problem'
     | '/settings'
     | '/'
+    | '/admin/contests'
+    | '/admin/problems'
+    | '/admin/users'
   id:
     | '__root__'
     | '/_layout'
     | '/login'
     | '/recover-password'
     | '/reset-password'
-    | '/_layout/admin'
-    | '/_layout/problem'
     | '/_layout/settings'
     | '/_layout/'
+    | '/_layout/admin/contests'
+    | '/_layout/admin/problems'
+    | '/_layout/admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -169,35 +181,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/problem': {
-      id: '/_layout/problem'
-      path: '/problem'
-      fullPath: '/problem'
-      preLoaderRoute: typeof LayoutProblemRouteImport
+    '/_layout/admin/users': {
+      id: '/_layout/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof LayoutAdminUsersRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/admin': {
-      id: '/_layout/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof LayoutAdminRouteImport
+    '/_layout/admin/problems': {
+      id: '/_layout/admin/problems'
+      path: '/admin/problems'
+      fullPath: '/admin/problems'
+      preLoaderRoute: typeof LayoutAdminProblemsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/admin/contests': {
+      id: '/_layout/admin/contests'
+      path: '/admin/contests'
+      fullPath: '/admin/contests'
+      preLoaderRoute: typeof LayoutAdminContestsRouteImport
       parentRoute: typeof LayoutRoute
     }
   }
 }
 
 interface LayoutRouteChildren {
-  LayoutAdminRoute: typeof LayoutAdminRoute
-  LayoutProblemRoute: typeof LayoutProblemRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutAdminContestsRoute: typeof LayoutAdminContestsRoute
+  LayoutAdminProblemsRoute: typeof LayoutAdminProblemsRoute
+  LayoutAdminUsersRoute: typeof LayoutAdminUsersRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutAdminRoute: LayoutAdminRoute,
-  LayoutProblemRoute: LayoutProblemRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutAdminContestsRoute: LayoutAdminContestsRoute,
+  LayoutAdminProblemsRoute: LayoutAdminProblemsRoute,
+  LayoutAdminUsersRoute: LayoutAdminUsersRoute,
 }
 
 const LayoutRouteWithChildren =

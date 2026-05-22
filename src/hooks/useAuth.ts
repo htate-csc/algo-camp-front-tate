@@ -24,17 +24,22 @@ const useAuth = () => {
     enabled: isLoggedIn(),
   })
 
-  const login = async (data: AccessToken) => {
+  const login = async (data: AccessToken): Promise<UserPublic> => {
     const response = await LoginService.loginAccessToken({
       formData: data,
     })
     localStorage.setItem("access_token", response.access_token)
+    return await UsersService.readUserMe()
   }
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate({ to: "/" })
+    onSuccess: (user) => {
+      if (user.is_superuser) {
+        navigate({ to: "/admin/contests" })
+      } else {
+        navigate({ to: "/" })
+      }
     },
     onError: handleError.bind(showErrorToast),
   })

@@ -1,16 +1,24 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Search } from "lucide-react"
 import { Suspense } from "react"
 
-import { ProblemsService } from "@/client"
+import { ProblemsService, UsersService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
+import PendingItems from "@/components/Pending/PendingItems"
 import AddProblem from "@/components/Problem/AddProblem"
 import { columns } from "@/components/Problem/columns"
-import PendingItems from "@/components/Pending/PendingItems"
 
-export const Route = createFileRoute("/_layout/problem")({
-  component: Problems,
+export const Route = createFileRoute("/_layout/admin/problems")({
+  component: AdminProblems,
+  beforeLoad: async () => {
+    const user = await UsersService.readUserMe()
+    if (!user.is_superuser) {
+      throw redirect({
+        to: "/",
+      })
+    }
+  },
   head: () => ({
     meta: [
       {
@@ -37,7 +45,9 @@ function ProblemsContent() {
           <Search className="h-8 w-8 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold">問題が登録されていません</h3>
-        <p className="text-muted-foreground">新しい問題を追加して開始しましょう</p>
+        <p className="text-muted-foreground">
+          新しい問題を追加して開始しましょう
+        </p>
       </div>
     )
   }
@@ -49,7 +59,7 @@ function ProblemsContent() {
   )
 }
 
-function Problems() {
+function AdminProblems() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">

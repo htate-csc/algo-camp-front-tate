@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { ContestsService, type ContestCreate } from "@/client"
+import { type ContestCreate, ContestsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -137,11 +137,7 @@ const AddContest = () => {
                       開催日時 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="datetime-local"
-                        {...field}
-                        required
-                      />
+                      <Input type="datetime-local" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -157,11 +153,7 @@ const AddContest = () => {
                       終了日時 <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="datetime-local"
-                        {...field}
-                        required
-                      />
+                      <Input type="datetime-local" {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,7 +163,11 @@ const AddContest = () => {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" type="button" disabled={mutation.isPending}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={mutation.isPending}
+                >
                   キャンセル
                 </Button>
               </DialogClose>

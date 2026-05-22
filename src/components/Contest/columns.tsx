@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import type { ContestPublic } from "@/client"
-import EditContest from "./EditContest"
 import DeleteContest from "./DeleteContest"
+import EditContest from "./EditContest"
 
 // 日時をフォーマットするヘルパー関数
 const formatDateTime = (dateStr: string | null | undefined): string => {
@@ -25,21 +25,27 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
     accessorKey: "title",
     header: "コンテスト名",
     cell: ({ row }) => (
-      <span className="font-semibold text-foreground">{row.original.title}</span>
+      <span className="font-semibold text-foreground">
+        {row.original.title}
+      </span>
     ),
   },
   {
     accessorKey: "start_at",
     header: "開催日時",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{formatDateTime(row.original.start_at)}</span>
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.start_at)}
+      </span>
     ),
   },
   {
     accessorKey: "end_at",
     header: "終了日時",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{formatDateTime(row.original.end_at)}</span>
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.end_at)}
+      </span>
     ),
   },
   {
@@ -70,21 +76,27 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
     accessorKey: "title",
     header: "", // 列名は表示しない
     cell: ({ row }) => (
-      <span className="font-semibold text-foreground">{row.original.title}</span>
+      <span className="font-semibold text-foreground">
+        {row.original.title}
+      </span>
     ),
   },
   {
     accessorKey: "start_at",
     header: "開催日時",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{formatDateTime(row.original.start_at)}</span>
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.start_at)}
+      </span>
     ),
   },
   {
     accessorKey: "end_at",
     header: "終了日時",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{formatDateTime(row.original.end_at)}</span>
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.end_at)}
+      </span>
     ),
   },
 ]

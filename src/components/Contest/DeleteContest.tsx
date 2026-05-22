@@ -61,7 +61,8 @@ const DeleteContest = ({ id }: DeleteContestProps) => {
           <DialogHeader>
             <DialogTitle>コンテストの削除</DialogTitle>
             <DialogDescription>
-              このコンテストを<strong>永久に削除</strong>しますか？ この操作は取り消せません。
+              このコンテストを<strong>永久に削除</strong>しますか？
+              この操作は取り消せません。
             </DialogDescription>
           </DialogHeader>
 

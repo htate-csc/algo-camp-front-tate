@@ -9,16 +9,18 @@ import useAuth from "@/hooks/useAuth"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
-const baseItems: Item[] = [
-  { title: "コンテスト管理", path: "/" },
-  { title: "問題管理", path: "/problem" },
-]
+const baseItems: Item[] = [{ title: "開催中コンテスト", path: "/" }]
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
 
   const items = currentUser?.is_superuser
-    ? [...baseItems, { title: "ユーザ管理", path: "/admin" }]
+    ? [
+        ...baseItems,
+        { title: "コンテスト管理", path: "/admin/contests" },
+        { title: "問題管理", path: "/admin/problems" },
+        { title: "ユーザ管理", path: "/admin/users" },
+      ]
     : baseItems
 
   return (

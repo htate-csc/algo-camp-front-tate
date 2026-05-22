@@ -16,8 +16,8 @@ function getUsersQueryOptions() {
   }
 }
 
-export const Route = createFileRoute("/_layout/admin")({
-  component: Admin,
+export const Route = createFileRoute("/_layout/admin/users")({
+  component: AdminUsers,
   beforeLoad: async () => {
     const user = await UsersService.readUserMe()
     if (!user.is_superuser) {
@@ -55,7 +55,7 @@ function UsersTable() {
   )
 }
 
-function Admin() {
+function AdminUsers() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">

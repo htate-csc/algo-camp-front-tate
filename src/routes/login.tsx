@@ -3,7 +3,10 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import type { Body_login_login_access_token as AccessToken } from "@/client"
+import {
+  type Body_login_login_access_token as AccessToken,
+  UsersService,
+} from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
 import {
   Form,
@@ -33,6 +36,17 @@ export const Route = createFileRoute("/login")({
   component: Login,
   beforeLoad: async () => {
     if (isLoggedIn()) {
+      try {
+        const user = await UsersService.readUserMe()
+        if (user.is_superuser) {
+          throw redirect({
+            to: "/admin/contests",
+          })
+        }
+      } catch (_e) {
+        // If there's an error (e.g. invalid token), let them load the login page
+        return
+      }
       throw redirect({
         to: "/",
       })
