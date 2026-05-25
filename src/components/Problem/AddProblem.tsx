@@ -33,7 +33,21 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "問題名は必須です" }),
-  time_limit: z.string().min(1, { message: "実行時間制限は必須です" }),
+  time_limit: z
+    .string()
+    .min(1, { message: "実行時間制限は必須です" })
+    .regex(/^[0-9,.]+$/, {
+      message: "半角数字、カンマ、ピリオドのみ入力可能です (例: 2,000)",
+    })
+    .refine(
+      (val) => {
+        const num = Number(val.replace(/,/g, ""))
+        return !Number.isNaN(num) && num >= 0 && num <= 2000
+      },
+      {
+        message: "実行時間制限は 2,000 ms (2秒) 以下である必要があります",
+      },
+    ),
   memory_limit: z.string().min(1, { message: "メモリ制限は必須です" }),
   content: z.string().min(1, { message: "問題文は必須です" }),
   input_format: z.string().min(1, { message: "入力フォーマットは必須です" }),
@@ -65,8 +79,8 @@ const AddProblem = () => {
     criteriaMode: "all",
     defaultValues: {
       name: "",
-      time_limit: "2000",
-      memory_limit: "1",
+      time_limit: "",
+      memory_limit: "",
       content: "",
       input_format: "",
       output_format: "",
@@ -96,7 +110,7 @@ const AddProblem = () => {
   const onSubmit = (data: FormData) => {
     const submitData: ProblemCreate = {
       name: data.name,
-      time_limit: data.time_limit,
+      time_limit: Number(data.time_limit.replace(/,/g, "")),
       memory_limit: Number(data.memory_limit),
       content: data.content,
       input_format: data.input_format,
@@ -163,7 +177,10 @@ const AddProblem = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="例: 2000"
+                        inputMode="numeric"
+                        pattern="[0-9,.]*"
+                        autoComplete="off"
+                        placeholder="2,000"
                         type="text"
                         {...field}
                         required

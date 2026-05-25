@@ -14,11 +14,14 @@ export const columns: ColumnDef<ProblemPublic>[] = [
   {
     accessorKey: "time_limit",
     header: "実行時間制限",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.time_limit} ms
-      </span>
-    ),
+    cell: ({ row }) => {
+      const val = row.original.time_limit
+      const formatted =
+        val !== undefined && val !== null
+          ? val.toLocaleString("en-US", { maximumFractionDigits: 3 })
+          : "N/A"
+      return <span className="text-muted-foreground">{formatted} ms</span>
+    },
   },
   {
     accessorKey: "memory_limit",

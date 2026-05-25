@@ -37,7 +37,21 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "問題名は必須です" }),
-  time_limit: z.string().min(1, { message: "実行時間制限は必須です" }),
+  time_limit: z
+    .string()
+    .min(1, { message: "実行時間制限は必須です" })
+    .regex(/^[0-9,.]+$/, {
+      message: "半角数字、カンマ、ピリオドのみ入力可能です (例: 2,000)",
+    })
+    .refine(
+      (val) => {
+        const num = Number(val.replace(/,/g, ""))
+        return !Number.isNaN(num) && num >= 0 && num <= 2000
+      },
+      {
+        message: "実行時間制限は 2,000 ms (2秒) 以下である必要があります",
+      },
+    ),
   memory_limit: z.string().min(1, { message: "メモリ制限は必須です" }),
   content: z.string().min(1, { message: "問題文は必須です" }),
   input_format: z.string().min(1, { message: "入力フォーマットは必須です" }),
@@ -62,6 +76,23 @@ interface EditProblemProps {
   problem: ProblemPublic
 }
 
+const formatCommaSeparated = (
+  val: string | number | null | undefined,
+): string => {
+  if (val === null || val === undefined || val === "") return ""
+  if (typeof val === "number") {
+    return val.toLocaleString("en-US")
+  }
+  const cleanVal = String(val).replace(/[^\d.]/g, "")
+  if (!cleanVal) return ""
+  const parts = cleanVal.split(".")
+  const integerPart = Number(parts[0]).toLocaleString("en-US")
+  if (parts.length > 1) {
+    return `${integerPart}.${parts[1]}`
+  }
+  return integerPart
+}
+
 const EditProblem = ({ problem }: EditProblemProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
@@ -70,7 +101,7 @@ const EditProblem = ({ problem }: EditProblemProps) => {
   const samples = problem.samples || []
   const defaultValues: FormData = {
     name: problem.name,
-    time_limit: problem.time_limit,
+    time_limit: formatCommaSeparated(problem.time_limit),
     memory_limit: String(problem.memory_limit),
     content: problem.content,
     input_format: problem.input_format,
@@ -106,7 +137,7 @@ const EditProblem = ({ problem }: EditProblemProps) => {
   const onSubmit = (data: FormData) => {
     const submitData: ProblemUpdate = {
       name: data.name,
-      time_limit: data.time_limit,
+      time_limit: Number(data.time_limit.replace(/,/g, "")),
       memory_limit: Number(data.memory_limit),
       content: data.content,
       input_format: data.input_format,
@@ -174,7 +205,10 @@ const EditProblem = ({ problem }: EditProblemProps) => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="例: 2000"
+                        inputMode="decimal"
+                        pattern="[0-9,.]*"
+                        autoComplete="off"
+                        placeholder="2,000"
                         type="text"
                         {...field}
                         required

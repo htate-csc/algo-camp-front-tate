@@ -77,7 +77,7 @@ export type PrivateUserCreate = {
 
 export type ProblemCreate = {
     name: string;
-    time_limit: string;
+    time_limit: number;
     memory_limit: number;
     content: string;
     input_format: string;
@@ -87,7 +87,7 @@ export type ProblemCreate = {
 
 export type ProblemPublic = {
     name: string;
-    time_limit: string;
+    time_limit: number;
     memory_limit: number;
     content: string;
     input_format: string;
@@ -105,7 +105,7 @@ export type ProblemsPublic = {
 
 export type ProblemUpdate = {
     name?: (string | null);
-    time_limit?: (string | null);
+    time_limit?: (number | null);
     memory_limit?: (number | null);
     content?: (string | null);
     input_format?: (string | null);

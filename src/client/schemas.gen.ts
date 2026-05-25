@@ -379,7 +379,9 @@ export const ProblemCreateSchema = {
             title: 'Name'
         },
         time_limit: {
-            type: 'string',
+            type: 'number',
+            maximum: 2000,
+            exclusiveMinimum: 0,
             title: 'Time Limit'
         },
         memory_limit: {
@@ -428,7 +430,9 @@ export const ProblemPublicSchema = {
             title: 'Name'
         },
         time_limit: {
-            type: 'string',
+            type: 'number',
+            maximum: 2000,
+            exclusiveMinimum: 0,
             title: 'Time Limit'
         },
         memory_limit: {
@@ -513,7 +517,9 @@ export const ProblemUpdateSchema = {
         time_limit: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'number',
+                    maximum: 2000,
+                    exclusiveMinimum: 0
                 },
                 {
                     type: 'null'
