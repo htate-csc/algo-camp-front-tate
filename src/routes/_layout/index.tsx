@@ -14,6 +14,14 @@ import { ongoingOrFinishedColumns } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
 import { userProblemColumns } from "@/components/Problem/columns"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -34,6 +42,42 @@ export const Route = createFileRoute("/_layout/")({
   }),
 })
 
+const LANGUAGES = [
+  { value: "cpp", label: "C++" },
+  { value: "objective-c", label: "Objective-C" },
+  { value: "java", label: "Java" },
+  { value: "kotlin", label: "Kotlin" },
+  { value: "scala", label: "Scala" },
+  { value: "swift", label: "Swift" },
+  { value: "csharp", label: "C#" },
+  { value: "go", label: "Go" },
+  { value: "haskell", label: "Haskell" },
+  { value: "erlang", label: "Erlang" },
+  { value: "perl", label: "Perl" },
+  { value: "python", label: "Python" },
+  { value: "python3", label: "Python3" },
+  { value: "ruby", label: "Ruby" },
+  { value: "php", label: "PHP" },
+  { value: "bash", label: "Bash" },
+  { value: "r", label: "R" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "coffeescript", label: "CoffeeScript" },
+  { value: "vb", label: "Visual Basic" },
+  { value: "cobol", label: "COBOL" },
+  { value: "fsharp", label: "F#" },
+  { value: "d", label: "D" },
+  { value: "clojure", label: "Clojure" },
+  { value: "elixir", label: "Elixir" },
+  { value: "mysql", label: "MySQL" },
+  { value: "rust", label: "Rust" },
+  { value: "scheme", label: "Scheme" },
+  { value: "commonlisp", label: "Common Lisp" },
+  { value: "nadesiko", label: "なでしこ" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "brainfuck", label: "Brainfuck" },
+  { value: "plain", label: "Plain Text" },
+]
+
 interface ProblemSolveViewProps {
   problemId: string
   onBack: () => void
@@ -44,6 +88,9 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
     queryKey: ["problem", problemId],
     queryFn: () => ProblemsService.readProblem({ id: problemId }),
   })
+
+  const [selectedLanguage, setSelectedLanguage] = useState("python3")
+  const [code, setCode] = useState("")
 
   return (
     <div className="flex flex-col gap-6">
@@ -149,26 +196,57 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
             </div>
           </div>
 
-          {/* 右半分: エディタプレースホルダー */}
-          <div className="flex flex-col border rounded-lg bg-card min-h-[450px] shadow-sm">
+          {/* 右半分: エディタ領域 */}
+          <div className="flex flex-col border rounded-lg bg-card min-h-[480px] shadow-sm">
+            {/* エディタヘッダー: 使用言語選択 */}
             <div className="flex items-center justify-between border-b px-4 py-3 bg-muted/30">
+              <div className="flex items-center gap-3 w-full max-w-[280px]">
+                <span className="text-xs font-semibold text-muted-foreground font-mono">
+                  LANG:
+                </span>
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={(val) => setSelectedLanguage(val)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="言語を選択" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex items-center gap-2">
                 <span className="flex h-3 w-3 rounded-full bg-destructive" />
                 <span className="flex h-3 w-3 rounded-full bg-amber-500" />
                 <span className="flex h-3 w-3 rounded-full bg-emerald-500" />
-                <span className="text-xs text-muted-foreground font-mono ml-2">
-                  editor.py (実装予定)
-                </span>
               </div>
             </div>
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <Cpu className="h-8 w-8 text-primary" />
+
+            {/* 回答コード記述エリア */}
+            <div className="flex-1 flex flex-col p-4 relative">
+              <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center justify-between font-mono">
+                <span>SOURCE CODE</span>
               </div>
-              <h3 className="text-lg font-semibold">問題実施画面 (実装予定)</h3>
-              <p className="text-muted-foreground text-sm max-w-sm mt-1">
-                こちらにコードエディタ、プログラミング言語の選択、テスト実行、および提出機能が実装される予定です。
-              </p>
+              <Textarea
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="flex-1 font-mono text-xs leading-relaxed p-4 bg-muted/20 border-border/80 focus-visible:ring-1 focus-visible:ring-primary min-h-[300px] resize-none"
+                placeholder="ここに解答コードを入力してください..."
+                spellCheck={false}
+                autoComplete="off"
+              />
+            </div>
+
+            {/* エディタフッター */}
+            <div className="border-t px-4 py-3 bg-muted/10 flex justify-end">
+              <Button size="sm" disabled>
+                提出する (実装予定)
+              </Button>
             </div>
           </div>
         </div>
@@ -211,9 +289,7 @@ function ProblemsList({
       </div>
 
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold tracking-tight">
-          {contest.title}
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">{contest.title}</h2>
       </div>
 
       {problemLinks.length === 0 ? (
