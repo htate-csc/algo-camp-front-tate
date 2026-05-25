@@ -62,7 +62,7 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
     header: "",
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <DeleteContest id={row.original.id} />
+        <DeleteContest contest={row.original} />
       </div>
     ),
     size: 40,
