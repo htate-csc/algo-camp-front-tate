@@ -26,6 +26,7 @@ export type ContestProblemsPublic = {
     contest_id: string;
     order_num?: number;
     id: string;
+    problem?: (ProblemMinimal | null);
 };
 
 export type ContestProblemsUpdate = {
@@ -83,6 +84,13 @@ export type ProblemCreate = {
     input_format: string;
     output_format: string;
     samples: Array<TestCaseSample>;
+};
+
+export type ProblemMinimal = {
+    id: string;
+    name: string;
+    time_limit: number;
+    memory_limit: number;
 };
 
 export type ProblemPublic = {

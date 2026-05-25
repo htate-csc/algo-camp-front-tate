@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import type { ContestPublic } from "@/client"
+import { Button } from "@/components/ui/button"
 import DeleteContest from "./DeleteContest"
 import EditContest from "./EditContest"
 
@@ -69,12 +70,11 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   },
 ]
 
-// 2. 実施中および終了したコンテスト用のカラム定義 (3列)
-// コンテスト名は表示するが、ヘッダーの列名は表示しない。開催日時と終了日時だけヘッダーに表示する。
+// 2. 実施中および終了したコンテスト用のカラム定義 (4列)
 export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
   {
     accessorKey: "title",
-    header: "", // 列名は表示しない
+    header: "コンテスト名",
     cell: ({ row }) => (
       <span className="font-semibold text-foreground">
         {row.original.title}
@@ -98,5 +98,21 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
         {formatDateTime(row.original.end_at)}
       </span>
     ),
+  },
+  {
+    id: "actions",
+    header: "アクション",
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as
+        | { onJoinContest?: (contest: ContestPublic) => void }
+        | undefined
+      return (
+        <div className="flex justify-start">
+          <Button size="sm" onClick={() => meta?.onJoinContest?.(row.original)}>
+            参加
+          </Button>
+        </div>
+      )
+    },
   },
 ]

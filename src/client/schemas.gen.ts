@@ -139,6 +139,16 @@ export const ContestProblemsPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        problem: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProblemMinimal'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -419,6 +429,31 @@ export const ProblemCreateSchema = {
     type: 'object',
     required: ['name', 'time_limit', 'memory_limit', 'content', 'input_format', 'output_format', 'samples'],
     title: 'ProblemCreate'
+} as const;
+
+export const ProblemMinimalSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        time_limit: {
+            type: 'number',
+            title: 'Time Limit'
+        },
+        memory_limit: {
+            type: 'integer',
+            title: 'Memory Limit'
+        }
+    },
+    type: 'object',
+    required: ['id', 'name', 'time_limit', 'memory_limit'],
+    title: 'ProblemMinimal'
 } as const;
 
 export const ProblemPublicSchema = {
