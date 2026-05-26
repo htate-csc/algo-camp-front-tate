@@ -19,4 +19,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      "/api-paiza": {
+        target: "https://api.paiza.io",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-paiza/, ""),
+      },
+    },
+  },
 })

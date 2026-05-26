@@ -15,13 +15,24 @@ import PendingItems from "@/components/Pending/PendingItems"
 import { userProblemColumns } from "@/components/Problem/columns"
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { type JudgeResult, Stepper } from "@/components/ui/stepper"
 import { Textarea } from "@/components/ui/textarea"
+import { usePaizaRunner } from "@/hooks/usePaizaRunner"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -91,6 +102,33 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
 
   const [selectedLanguage, setSelectedLanguage] = useState("python3")
   const [code, setCode] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [lastResults, setLastResults] = useState<(JudgeResult | null)[]>([])
+
+  const { steps, isRunning, runSubmission, cancelSubmission } =
+    usePaizaRunner()
+
+  const handleSubmit = async () => {
+    if (!problem || !code) return
+    setIsDialogOpen(true)
+    const results = await runSubmission({
+      code,
+      language: selectedLanguage,
+      samples: problem.samples || [],
+      timeLimitMs: problem.time_limit || 2000,
+      memoryLimitGb: problem.memory_limit || 1,
+    })
+    if (results) {
+      setLastResults(results)
+    }
+  }
+
+  const handleCloseDialog = () => {
+    if (isRunning) {
+      cancelSubmission()
+    }
+    setIsDialogOpen(false)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -243,9 +281,49 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
             </div>
 
             {/* エディタフッター */}
-            <div className="border-t px-4 py-3 bg-muted/10 flex justify-end">
-              <Button size="sm" disabled>
-                提出する (実装予定)
+            <div className="border-t px-4 py-3 bg-muted/10 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs">
+                {lastResults.length > 0 && (
+                  <>
+                    <span className="text-muted-foreground font-medium mr-1">
+                      直近の判定結果:
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {lastResults.map((res, idx) => (
+                        <span
+                          key={idx}
+                          className={cn(
+                            "font-mono font-bold px-2 py-0.5 rounded border text-[10px] uppercase tracking-wider shadow-sm",
+                            res === "AC" &&
+                              "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400 dark:bg-emerald-500/5",
+                            res === "WA" &&
+                              "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 dark:bg-amber-500/5",
+                            res === "RE" &&
+                              "bg-destructive/10 text-destructive border-destructive/20",
+                            res === "TLE" &&
+                              "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400 dark:bg-blue-500/5",
+                            res === "MLE" &&
+                              "bg-indigo-500/10 text-indigo-600 border-indigo-500/20 dark:text-indigo-400 dark:bg-indigo-500/5",
+                            res === "CE" &&
+                              "bg-muted text-muted-foreground border-muted-foreground/20",
+                            res === null &&
+                              "bg-muted/40 text-muted-foreground/40 border-muted/20"
+                          )}
+                          title={`テストケース ${idx + 1}`}
+                        >
+                          {res || "-"}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={handleSubmit}
+                disabled={!code || isRunning}
+              >
+                提出する
               </Button>
             </div>
           </div>
@@ -255,6 +333,52 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
           問題の読み込みに失敗しました。
         </div>
       )}
+
+      {/* 提出結果判定モーダル */}
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCloseDialog()
+        }}
+      >
+        <DialogContent className="sm:max-w-md" showCloseButton={!isRunning}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              {isRunning ? "解答を判定中..." : "判定結果"}
+            </DialogTitle>
+            <DialogDescription>
+              {isRunning
+                ? "Paiza.io APIを使用して、テストケースを実行しています。"
+                : "すべてのテストケースの実行が完了しました。"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Stepper steps={steps} />
+          </div>
+
+          <DialogFooter className="flex sm:justify-between items-center gap-2">
+            {isRunning ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCloseDialog}
+                className="w-full sm:w-auto"
+              >
+                キャンセル
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleCloseDialog}
+                className="w-full sm:w-auto ml-auto"
+              >
+                閉じる
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
