@@ -1,5 +1,8 @@
+"use client"
+
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -32,37 +35,31 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>
 
-export const Route = createFileRoute("/login")({
-  component: Login,
-  beforeLoad: async () => {
-    if (isLoggedIn()) {
-      try {
-        const user = await UsersService.readUserMe()
-        if (user.is_superuser) {
-          throw redirect({
-            to: "/admin/contests",
-          })
-        }
-      } catch (_e) {
-        // If there's an error (e.g. invalid token), let them load the login page
-        return
-      }
-      throw redirect({
-        to: "/",
-      })
-    }
-  },
-  head: () => ({
-    meta: [
-      {
-        title: "ログイン",
-      },
-    ],
-  }),
-})
-
-function Login() {
+export default function LoginPage() {
+  const router = useRouter()
   const { loginMutation } = useAuth()
+  const [checkingAuth, setCheckingAuth] = useState(true)
+
+  useEffect(() => {
+    async function checkAuth() {
+      if (isLoggedIn()) {
+        try {
+          const user = await UsersService.readUserMe()
+          if (user.is_superuser) {
+            router.replace("/admin/contests")
+          } else {
+            router.replace("/")
+          }
+          return
+        } catch (_e) {
+          // If error (invalid token), allow user to log in
+        }
+      }
+      setCheckingAuth(false)
+    }
+    checkAuth()
+  }, [router])
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -76,6 +73,14 @@ function Login() {
   const onSubmit = (data: FormData) => {
     if (loginMutation.isPending) return
     loginMutation.mutate(data)
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
   }
 
   return (

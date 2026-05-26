@@ -41,15 +41,19 @@ export const paizaClient = {
     language: string,
     input: string,
   ): Promise<PaizaCreateResponse> {
+    const body = new URLSearchParams({
+      api_key: "guest",
+      source_code: sourceCode,
+      language,
+      input,
+    })
+
     const response = await axios.post<PaizaCreateResponse>(
       `${PAIZA_BASE_URL}/runners/create.json`,
-      null, // No body
+      body,
       {
-        params: {
-          api_key: "guest",
-          source_code: sourceCode,
-          language: language,
-          input: input,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       },
     )

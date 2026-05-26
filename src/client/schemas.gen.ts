@@ -337,24 +337,6 @@ export const MessageSchema = {
     title: 'Message'
 } as const;
 
-export const NewPasswordSchema = {
-    properties: {
-        token: {
-            type: 'string',
-            title: 'Token'
-        },
-        new_password: {
-            type: 'string',
-            maxLength: 128,
-            minLength: 8,
-            title: 'New Password'
-        }
-    },
-    type: 'object',
-    required: ['token', 'new_password'],
-    title: 'NewPassword'
-} as const;
-
 export const PrivateUserCreateSchema = {
     properties: {
         login_id: {
@@ -685,26 +667,6 @@ export const TokenSchema = {
     title: 'Token'
 } as const;
 
-export const UpdatePasswordSchema = {
-    properties: {
-        current_password: {
-            type: 'string',
-            maxLength: 128,
-            minLength: 8,
-            title: 'Current Password'
-        },
-        new_password: {
-            type: 'string',
-            maxLength: 128,
-            minLength: 8,
-            title: 'New Password'
-        }
-    },
-    type: 'object',
-    required: ['current_password', 'new_password'],
-    title: 'UpdatePassword'
-} as const;
-
 export const UserCreateSchema = {
     properties: {
         login_id: {
@@ -866,37 +828,6 @@ export const UserUpdateSchema = {
     },
     type: 'object',
     title: 'UserUpdate'
-} as const;
-
-export const UserUpdateMeSchema = {
-    properties: {
-        full_name: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Full Name'
-        },
-        login_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Login Id'
-        }
-    },
-    type: 'object',
-    title: 'UserUpdateMe'
 } as const;
 
 export const UsersPublicSchema = {

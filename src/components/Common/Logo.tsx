@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
-import logo from "/assets/images/wa_rev.png"
+
+const logo = "/assets/images/wa_rev.png"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -38,5 +39,5 @@ export function Logo({
     return content
   }
 
-  return <Link to="/">{content}</Link>
+  return <Link href="/">{content}</Link>
 }

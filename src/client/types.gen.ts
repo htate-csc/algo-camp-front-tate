@@ -64,11 +64,6 @@ export type Message = {
     message: string;
 };
 
-export type NewPassword = {
-    token: string;
-    new_password: string;
-};
-
 export type PrivateUserCreate = {
     login_id: string;
     password: string;
@@ -131,11 +126,6 @@ export type Token = {
     token_type?: string;
 };
 
-export type UpdatePassword = {
-    current_password: string;
-    new_password: string;
-};
-
 export type UserCreate = {
     login_id: string;
     is_superuser?: boolean;
@@ -167,11 +157,6 @@ export type UserUpdate = {
     is_superuser?: boolean;
     full_name?: (string | null);
     password?: (string | null);
-};
-
-export type UserUpdateMe = {
-    full_name?: (string | null);
-    login_id?: (string | null);
 };
 
 export type ValidationError = {
@@ -244,24 +229,6 @@ export type LoginLoginAccessTokenResponse = (Token);
 
 export type LoginTestTokenResponse = (UserPublic);
 
-export type LoginRecoverPasswordData = {
-    loginId: string;
-};
-
-export type LoginRecoverPasswordResponse = (Message);
-
-export type LoginResetPasswordData = {
-    requestBody: NewPassword;
-};
-
-export type LoginResetPasswordResponse = (Message);
-
-export type LoginRecoverPasswordHtmlContentData = {
-    loginId: string;
-};
-
-export type LoginRecoverPasswordHtmlContentResponse = (string);
-
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
@@ -314,20 +281,6 @@ export type UsersCreateUserData = {
 export type UsersCreateUserResponse = (UserPublic);
 
 export type UsersReadUserMeResponse = (UserPublic);
-
-export type UsersDeleteUserMeResponse = (Message);
-
-export type UsersUpdateUserMeData = {
-    requestBody: UserUpdateMe;
-};
-
-export type UsersUpdateUserMeResponse = (UserPublic);
-
-export type UsersUpdatePasswordMeData = {
-    requestBody: UpdatePassword;
-};
-
-export type UsersUpdatePasswordMeResponse = (Message);
 
 export type UsersRegisterUserData = {
     requestBody: UserRegister;

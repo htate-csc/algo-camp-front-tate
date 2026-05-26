@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 openapi.json
+.env
+.env.local
+.env.production
+.env.development
 
 # Editor directories and files
 .vscode/*
@@ -28,3 +32,10 @@ openapi.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Next.js build output
+.next/
+out/
+
+.env
+

@@ -1,32 +1,16 @@
-import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Search } from "lucide-react"
-import { Suspense } from "react"
+"use client"
 
-import { ProblemsService, UsersService } from "@/client"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { Search } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Suspense, useEffect } from "react"
+
+import { ProblemsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import PendingItems from "@/components/Pending/PendingItems"
 import AddProblem from "@/components/Problem/AddProblem"
 import { columns } from "@/components/Problem/columns"
-
-export const Route = createFileRoute("/_layout/admin/problems")({
-  component: AdminProblems,
-  beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-    if (!user.is_superuser) {
-      throw redirect({
-        to: "/",
-      })
-    }
-  },
-  head: () => ({
-    meta: [
-      {
-        title: "問題管理 - WA Rev.",
-      },
-    ],
-  }),
-})
+import useAuth from "@/hooks/useAuth"
 
 function getProblemsQueryOptions() {
   return {
@@ -59,7 +43,24 @@ function ProblemsContent() {
   )
 }
 
-function AdminProblems() {
+export default function AdminProblems() {
+  const { user } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (user && !user.is_superuser) {
+      router.replace("/")
+    }
+  }, [user, router])
+
+  if (!user?.is_superuser) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">

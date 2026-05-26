@@ -1,14 +1,11 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { ArrowLeft, Calendar, Clock, Cpu } from "lucide-react"
-import { Suspense, useState } from "react"
+"use client"
 
-import {
-  type ContestPublic,
-  ContestsService,
-  ProblemsService,
-  UsersService,
-} from "@/client"
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import { ArrowLeft, Calendar, Clock, Cpu } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useState } from "react"
+
+import { type ContestPublic, ContestsService, ProblemsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { ongoingOrFinishedColumns } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -31,27 +28,9 @@ import {
 } from "@/components/ui/select"
 import { type JudgeResult, Stepper } from "@/components/ui/stepper"
 import { Textarea } from "@/components/ui/textarea"
+import useAuth from "@/hooks/useAuth"
 import { usePaizaRunner } from "@/hooks/usePaizaRunner"
 import { cn } from "@/lib/utils"
-
-export const Route = createFileRoute("/_layout/")({
-  component: Dashboard,
-  beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-    if (user.is_superuser) {
-      throw redirect({
-        to: "/admin/contests",
-      })
-    }
-  },
-  head: () => ({
-    meta: [
-      {
-        title: "コンテスト一覧 - WA Rev.",
-      },
-    ],
-  }),
-})
 
 const LANGUAGES = [
   { value: "c", label: "C" },
@@ -84,8 +63,7 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [lastResults, setLastResults] = useState<(JudgeResult | null)[]>([])
 
-  const { steps, isRunning, runSubmission, cancelSubmission } =
-    usePaizaRunner()
+  const { steps, isRunning, runSubmission, cancelSubmission } = usePaizaRunner()
 
   const handleSubmit = async () => {
     if (!problem || !code) return
@@ -286,7 +264,7 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
                             res === "CE" &&
                               "bg-muted text-muted-foreground border-muted-foreground/20",
                             res === null &&
-                              "bg-muted/40 text-muted-foreground/40 border-muted/20"
+                              "bg-muted/40 text-muted-foreground/40 border-muted/20",
                           )}
                           title={`テストケース ${idx + 1}`}
                         >
@@ -500,4 +478,25 @@ function Dashboard() {
       </Suspense>
     </div>
   )
+}
+
+export default function DashboardPage() {
+  const { user } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (user?.is_superuser) {
+      router.replace("/admin/contests")
+    }
+  }, [user, router])
+
+  if (user?.is_superuser) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  return <Dashboard />
 }

@@ -161,9 +161,18 @@ export function usePaizaRunner() {
 
           // Determine Judgment
           let stepResult: JudgeResult = "AC"
-          const timeSec = details.time !== null && details.time !== undefined ? Number(details.time) : 0
-          const memoryBytes = details.memory !== null && details.memory !== undefined ? Number(details.memory) : 0
-          const exitCode = details.exit_code !== null && details.exit_code !== undefined ? Number(details.exit_code) : null
+          const timeSec =
+            details.time !== null && details.time !== undefined
+              ? Number(details.time)
+              : 0
+          const memoryBytes =
+            details.memory !== null && details.memory !== undefined
+              ? Number(details.memory)
+              : 0
+          const exitCode =
+            details.exit_code !== null && details.exit_code !== undefined
+              ? Number(details.exit_code)
+              : null
 
           // Compile Error
           if (
@@ -216,27 +225,33 @@ export function usePaizaRunner() {
           setSteps(currentStepsState)
 
           if (stepResult === "AC") {
-            console.log(`Testcase ${i + 1} passed with result: AC [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`, {
-              result: details.result,
-              exit_code: details.exit_code,
-              stdout: details.stdout,
-              stderr: details.stderr,
-              time: `${(timeSec * 1000).toFixed(0)} ms`,
-              memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
-              build_result: details.build_result,
-              build_stderr: details.build_stderr,
-            })
+            console.log(
+              `Testcase ${i + 1} passed with result: AC [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`,
+              {
+                result: details.result,
+                exit_code: details.exit_code,
+                stdout: details.stdout,
+                stderr: details.stderr,
+                time: `${(timeSec * 1000).toFixed(0)} ms`,
+                memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
+                build_result: details.build_result,
+                build_stderr: details.build_stderr,
+              },
+            )
           } else {
-            console.error(`Testcase ${i + 1} failed with result: ${stepResult} [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`, {
-              result: details.result,
-              exit_code: details.exit_code,
-              stdout: details.stdout,
-              stderr: details.stderr,
-              time: `${(timeSec * 1000).toFixed(0)} ms`,
-              memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
-              build_result: details.build_result,
-              build_stderr: details.build_stderr,
-            })
+            console.error(
+              `Testcase ${i + 1} failed with result: ${stepResult} [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`,
+              {
+                result: details.result,
+                exit_code: details.exit_code,
+                stdout: details.stdout,
+                stderr: details.stderr,
+                time: `${(timeSec * 1000).toFixed(0)} ms`,
+                memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
+                build_result: details.build_result,
+                build_stderr: details.build_stderr,
+              },
+            )
             if (!failedResult) {
               failedResult = stepResult
             }

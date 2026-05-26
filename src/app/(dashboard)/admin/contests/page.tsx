@@ -1,9 +1,11 @@
-import { useSuspenseQueries } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Calendar } from "lucide-react"
-import { Suspense } from "react"
+"use client"
 
-import { ContestsService, UsersService } from "@/client"
+import { useSuspenseQueries } from "@tanstack/react-query"
+import { Calendar } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Suspense, useEffect } from "react"
+
+import { ContestsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import AddContest from "@/components/Contest/AddContest"
 import {
@@ -11,28 +13,9 @@ import {
   scheduledColumns,
 } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
-
-export const Route = createFileRoute("/_layout/admin/contests")({
-  component: AdminContestsDashboard,
-  beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-    if (!user.is_superuser) {
-      throw redirect({
-        to: "/",
-      })
-    }
-  },
-  head: () => ({
-    meta: [
-      {
-        title: "コンテスト管理 - WA Rev.",
-      },
-    ],
-  }),
-})
+import useAuth from "@/hooks/useAuth"
 
 function ContestsContent() {
-  // 管理者専用ルートなので isSuperuser は常に true 扱い、全クエリを実行
   const results = useSuspenseQueries({
     queries: [
       {
@@ -114,7 +97,24 @@ function ContestsContent() {
   )
 }
 
-function AdminContestsDashboard() {
+export default function AdminContestsDashboard() {
+  const { user } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (user && !user.is_superuser) {
+      router.replace("/")
+    }
+  }, [user, router])
+
+  if (!user?.is_superuser) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">

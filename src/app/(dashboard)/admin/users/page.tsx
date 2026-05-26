@@ -1,6 +1,8 @@
+"use client"
+
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Suspense } from "react"
+import { useRouter } from "next/navigation"
+import { Suspense, useEffect } from "react"
 
 import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
@@ -15,25 +17,6 @@ function getUsersQueryOptions() {
     queryKey: ["users"],
   }
 }
-
-export const Route = createFileRoute("/_layout/admin/users")({
-  component: AdminUsers,
-  beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-    if (!user.is_superuser) {
-      throw redirect({
-        to: "/",
-      })
-    }
-  },
-  head: () => ({
-    meta: [
-      {
-        title: "ユーザ管理 - WA Rev.",
-      },
-    ],
-  }),
-})
 
 function UsersTableContent() {
   const { user: currentUser } = useAuth()
@@ -54,7 +37,24 @@ function UsersTable() {
   )
 }
 
-function AdminUsers() {
+export default function AdminUsers() {
+  const { user } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (user && !user.is_superuser) {
+      router.replace("/")
+    }
+  }, [user, router])
+
+  if (!user?.is_superuser) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
