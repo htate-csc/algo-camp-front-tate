@@ -216,20 +216,24 @@ export function usePaizaRunner() {
           setSteps(currentStepsState)
 
           if (stepResult === "AC") {
-            console.log(`Testcase ${i + 1} passed with result: AC`, {
+            console.log(`Testcase ${i + 1} passed with result: AC [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`, {
               result: details.result,
               exit_code: details.exit_code,
               stdout: details.stdout,
               stderr: details.stderr,
+              time: `${(timeSec * 1000).toFixed(0)} ms`,
+              memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
               build_result: details.build_result,
               build_stderr: details.build_stderr,
             })
           } else {
-            console.error(`Testcase ${i + 1} failed with result: ${stepResult}`, {
+            console.error(`Testcase ${i + 1} failed with result: ${stepResult} [${(timeSec * 1000).toFixed(0)}ms / ${(memoryBytes / 1024 / 1024).toFixed(2)}MB]`, {
               result: details.result,
               exit_code: details.exit_code,
               stdout: details.stdout,
               stderr: details.stderr,
+              time: `${(timeSec * 1000).toFixed(0)} ms`,
+              memory: `${(memoryBytes / 1024 / 1024).toFixed(2)} MB`,
               build_result: details.build_result,
               build_stderr: details.build_stderr,
             })
