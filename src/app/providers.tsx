@@ -6,9 +6,17 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ApiError, OpenAPI } from "@/client"
 import { Toaster } from "@/components/ui/sonner"
+
+OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+OpenAPI.TOKEN = async () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("access_token") || ""
+  }
+  return ""
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => {
@@ -29,16 +37,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }),
     })
   })
-
-  useEffect(() => {
-    OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-    OpenAPI.TOKEN = async () => {
-      if (typeof window !== "undefined") {
-        return localStorage.getItem("access_token") || ""
-      }
-      return ""
-    }
-  }, [])
 
   return (
     <QueryClientProvider client={queryClient}>
