@@ -25,6 +25,7 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   {
     accessorKey: "title",
     header: "コンテスト名",
+    size: 350,
     cell: ({ row }) => (
       <span className="font-semibold text-foreground">
         {row.original.title}
@@ -33,7 +34,8 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   },
   {
     accessorKey: "start_at",
-    header: "開催日時",
+    header: "開始日時",
+    size: 220,
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {formatDateTime(row.original.start_at)}
@@ -43,6 +45,7 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   {
     accessorKey: "end_at",
     header: "終了日時",
+    size: 220,
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {formatDateTime(row.original.end_at)}
@@ -52,6 +55,7 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   {
     id: "actions",
     header: "アクション",
+    size: 100,
     cell: ({ row }) => (
       <div className="flex justify-start">
         <EditContest contest={row.original} />
@@ -61,20 +65,21 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
   {
     id: "delete",
     header: "",
+    size: 60,
     cell: ({ row }) => (
       <div className="flex justify-center">
         <DeleteContest contest={row.original} />
       </div>
     ),
-    size: 40,
   },
 ]
 
-// 2. 実施中および終了したコンテスト用のカラム定義 (4列)
+// 2. 一般ユーザーの実施中コンテスト用のカラム定義 (4列)
 export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
   {
     accessorKey: "title",
-    header: "コンテスト名",
+    header: "",
+    size: 350,
     cell: ({ row }) => (
       <span className="font-semibold text-foreground">
         {row.original.title}
@@ -83,7 +88,8 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
   },
   {
     accessorKey: "start_at",
-    header: "開催日時",
+    header: "開始日時",
+    size: 220,
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {formatDateTime(row.original.start_at)}
@@ -93,6 +99,7 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
   {
     accessorKey: "end_at",
     header: "終了日時",
+    size: 220,
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {formatDateTime(row.original.end_at)}
@@ -102,6 +109,7 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
   {
     id: "actions",
     header: "アクション",
+    size: 160,
     cell: ({ row, table }) => {
       const meta = table.options.meta as
         | { onJoinContest?: (contest: ContestPublic) => void }
@@ -114,5 +122,51 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
         </div>
       )
     },
+  },
+]
+
+// 3. 管理者の実施中・終了したコンテスト用のカラム定義 (5列・幅合わせ用ダミー列を含む)
+export const adminOngoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
+  {
+    accessorKey: "title",
+    header: "",
+    size: 350,
+    cell: ({ row }) => (
+      <span className="font-semibold text-foreground">
+        {row.original.title}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "start_at",
+    header: "開始日時",
+    size: 220,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.start_at)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "end_at",
+    header: "終了日時",
+    size: 220,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {formatDateTime(row.original.end_at)}
+      </span>
+    ),
+  },
+  {
+    id: "blank1",
+    header: "",
+    size: 100,
+    cell: () => null,
+  },
+  {
+    id: "blank2",
+    header: "",
+    size: 60,
+    cell: () => null,
   },
 ]

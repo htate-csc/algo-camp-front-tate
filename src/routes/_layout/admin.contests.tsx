@@ -7,7 +7,7 @@ import { ContestsService, UsersService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import AddContest from "@/components/Contest/AddContest"
 import {
-  ongoingOrFinishedColumns,
+  adminOngoingOrFinishedColumns,
   scheduledColumns,
 } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -94,7 +94,7 @@ function ContestsContent() {
             実施中のコンテストはありません
           </p>
         ) : (
-          <DataTable columns={ongoingOrFinishedColumns} data={ongoing} />
+          <DataTable columns={adminOngoingOrFinishedColumns} data={ongoing} />
         )}
       </div>
 
@@ -107,7 +107,7 @@ function ContestsContent() {
             終了したコンテストはありません
           </p>
         ) : (
-          <DataTable columns={ongoingOrFinishedColumns} data={finished} />
+          <DataTable columns={adminOngoingOrFinishedColumns} data={finished} />
         )}
       </div>
     </div>
