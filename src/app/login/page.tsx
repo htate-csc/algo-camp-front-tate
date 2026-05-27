@@ -104,6 +104,7 @@ export default function LoginPage() {
                   <FormControl>
                     <Input
                       data-testid="login-id-input"
+                      autoComplete="username"
                       placeholder=""
                       {...field}
                     />
@@ -122,6 +123,7 @@ export default function LoginPage() {
                   <FormControl>
                     <PasswordInput
                       data-testid="password-input"
+                      autoComplete="current-password"
                       placeholder=""
                       {...field}
                     />

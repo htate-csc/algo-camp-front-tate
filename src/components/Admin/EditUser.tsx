@@ -155,6 +155,7 @@ const EditUser = ({ user }: EditUserProps) => {
                       <Input
                         placeholder="Password"
                         type="password"
+                        autoComplete="new-password"
                         {...field}
                       />
                     </FormControl>
@@ -173,6 +174,7 @@ const EditUser = ({ user }: EditUserProps) => {
                       <Input
                         placeholder="Password"
                         type="password"
+                        autoComplete="new-password"
                         {...field}
                       />
                     </FormControl>

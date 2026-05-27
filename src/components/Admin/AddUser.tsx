@@ -152,6 +152,7 @@ const AddUser = () => {
                       <Input
                         placeholder="Password"
                         type="password"
+                        autoComplete="new-password"
                         {...field}
                         required
                       />
@@ -174,6 +175,7 @@ const AddUser = () => {
                       <Input
                         placeholder="Password"
                         type="password"
+                        autoComplete="new-password"
                         {...field}
                         required
                       />
