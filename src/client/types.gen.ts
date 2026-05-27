@@ -21,6 +21,11 @@ export type ContestProblemsCreate = {
     order_num?: number;
 };
 
+export type ContestProblemsListPublic = {
+    data: Array<ContestProblemsPublic>;
+    count: number;
+};
+
 export type ContestProblemsPublic = {
     problem_id: string;
     contest_id: string;
@@ -48,6 +53,19 @@ export type ContestPublic = {
 export type ContestsPublic = {
     data: Array<ContestPublic>;
     count: number;
+};
+
+export type ContestSummariesPublic = {
+    data: Array<ContestSummaryPublic>;
+    count: number;
+    server_now: string;
+};
+
+export type ContestSummaryPublic = {
+    id: string;
+    title: string;
+    start_at: string;
+    end_at: string;
 };
 
 export type ContestUpdate = {
@@ -201,6 +219,19 @@ export type ContestsCreateContestData = {
 };
 
 export type ContestsCreateContestResponse = (ContestPublic);
+
+export type ContestsReadAvailableContestsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ContestsReadAvailableContestsResponse = (ContestSummariesPublic);
+
+export type ContestsReadContestProblemsData = {
+    id: string;
+};
+
+export type ContestsReadContestProblemsResponse = (ContestProblemsListPublic);
 
 export type ContestsReadContestData = {
     id: string;

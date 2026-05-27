@@ -118,6 +118,25 @@ export const ContestProblemsCreateSchema = {
     title: 'ContestProblemsCreate'
 } as const;
 
+export const ContestProblemsListPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ContestProblemsPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ContestProblemsListPublic'
+} as const;
+
 export const ContestProblemsPublicSchema = {
     properties: {
         problem_id: {
@@ -252,6 +271,57 @@ export const ContestPublicSchema = {
     type: 'object',
     required: ['title', 'start_at', 'end_at', 'id'],
     title: 'ContestPublic'
+} as const;
+
+export const ContestSummariesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ContestSummaryPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        server_now: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Server Now'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count', 'server_now'],
+    title: 'ContestSummariesPublic'
+} as const;
+
+export const ContestSummaryPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        title: {
+            type: 'string',
+            title: 'Title'
+        },
+        start_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Start At'
+        },
+        end_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'End At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'title', 'start_at', 'end_at'],
+    title: 'ContestSummaryPublic'
 } as const;
 
 export const ContestUpdateSchema = {

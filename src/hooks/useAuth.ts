@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
 import {
@@ -17,6 +17,7 @@ const isLoggedIn = () => {
 
 const useAuth = () => {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { showErrorToast } = useCustomToast()
 
   const { data: user } = useQuery<UserPublic | null, Error>({
@@ -36,6 +37,7 @@ const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (user) => {
+      queryClient.setQueryData(["currentUser"], user)
       if (user.is_superuser) {
         router.push("/admin/contests")
       } else {
@@ -47,6 +49,7 @@ const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem("access_token")
+    queryClient.removeQueries({ queryKey: ["currentUser"] })
     router.push("/login")
   }
 

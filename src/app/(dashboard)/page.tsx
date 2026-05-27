@@ -5,7 +5,12 @@ import { ArrowLeft, Calendar, Clock, Cpu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
 
-import { type ContestPublic, ContestsService, ProblemsService } from "@/client"
+import {
+  type ContestProblemsPublic,
+  type ContestSummaryPublic,
+  ContestsService,
+  ProblemsService,
+} from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { ongoingOrFinishedColumns } from "@/components/Contest/columns"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -29,6 +34,7 @@ import {
 import { type JudgeResult, Stepper } from "@/components/ui/stepper"
 import { Textarea } from "@/components/ui/textarea"
 import useAuth from "@/hooks/useAuth"
+import useContestBoundaryClock from "@/hooks/useContestBoundaryClock"
 import { usePaizaRunner } from "@/hooks/usePaizaRunner"
 import { cn } from "@/lib/utils"
 
@@ -345,11 +351,19 @@ function ProblemsList({
   onBack,
   onSelectProblem,
 }: {
-  contest: ContestPublic
+  contest: ContestSummaryPublic
   onBack: () => void
   onSelectProblem: (id: string) => void
 }) {
-  const problemLinks = [...(contest.problem_links || [])].sort((a, b) => {
+  const { data: contestProblemsData, isLoading } = useQuery({
+    queryKey: ["contest", contest.id, "problems"],
+    queryFn: () => ContestsService.readContestProblems({ id: contest.id }),
+    staleTime: 60_000,
+  })
+
+  const problemLinks: ContestProblemsPublic[] = [
+    ...(contestProblemsData?.data || []),
+  ].sort((a, b) => {
     const aOrder = a.order_num ?? 0
     const bOrder = b.order_num ?? 0
     return aOrder - bOrder
@@ -373,7 +387,11 @@ function ProblemsList({
         <h2 className="text-2xl font-bold tracking-tight">{contest.title}</h2>
       </div>
 
-      {problemLinks.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center p-12">
+          <PendingItems />
+        </div>
+      ) : problemLinks.length === 0 ? (
         <div className="text-center py-12 border rounded-lg bg-card text-muted-foreground">
           このコンテストにはまだ問題が登録されていません。
         </div>
@@ -395,14 +413,22 @@ function ProblemsList({
 function ContestsContent({
   onJoinContest,
 }: {
-  onJoinContest: (contest: ContestPublic) => void
+  onJoinContest: (contest: ContestSummaryPublic) => void
 }) {
   const { data: contestsData } = useSuspenseQuery({
-    queryKey: ["contests", "ongoing"],
-    queryFn: () => ContestsService.readContests({ status: "ongoing" }),
+    queryKey: ["contests", "available"],
+    queryFn: () => ContestsService.readAvailableContests(),
+    staleTime: 5 * 60_000,
   })
 
-  const ongoing = contestsData?.data ?? []
+  const contests = contestsData?.data ?? []
+  const now = useContestBoundaryClock(contests, contestsData?.server_now)
+  const ongoing = contests.filter((contest) => {
+    const start = Date.parse(contest.start_at)
+    const end = Date.parse(contest.end_at)
+
+    return start <= now && now < end
+  })
 
   if (ongoing.length === 0) {
     return (
@@ -436,9 +462,8 @@ function ContestsContent({
 }
 
 function Dashboard() {
-  const [selectedContest, setSelectedContest] = useState<ContestPublic | null>(
-    null,
-  )
+  const [selectedContest, setSelectedContest] =
+    useState<ContestSummaryPublic | null>(null)
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(
     null,
   )

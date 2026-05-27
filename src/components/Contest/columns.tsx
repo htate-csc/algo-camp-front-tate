@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import type { ContestPublic } from "@/client"
+import type { ContestPublic, ContestSummaryPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import DeleteContest from "./DeleteContest"
 import EditContest from "./EditContest"
@@ -75,7 +75,7 @@ export const scheduledColumns: ColumnDef<ContestPublic>[] = [
 ]
 
 // 2. 一般ユーザーの実施中コンテスト用のカラム定義 (4列)
-export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
+export const ongoingOrFinishedColumns: ColumnDef<ContestSummaryPublic>[] = [
   {
     accessorKey: "title",
     header: "",
@@ -112,7 +112,7 @@ export const ongoingOrFinishedColumns: ColumnDef<ContestPublic>[] = [
     size: 160,
     cell: ({ row, table }) => {
       const meta = table.options.meta as
-        | { onJoinContest?: (contest: ContestPublic) => void }
+        | { onJoinContest?: (contest: ContestSummaryPublic) => void }
         | undefined
       return (
         <div className="flex justify-start">

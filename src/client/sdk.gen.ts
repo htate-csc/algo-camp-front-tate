@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ContestProblemsCreateContestProblemsData, ContestProblemsCreateContestProblemsResponse, ContestProblemsUpdateContestProblemsData, ContestProblemsUpdateContestProblemsResponse, ContestProblemsDeleteContestProblemsData, ContestProblemsDeleteContestProblemsResponse, ContestsReadContestsData, ContestsReadContestsResponse, ContestsCreateContestData, ContestsCreateContestResponse, ContestsReadContestData, ContestsReadContestResponse, ContestsUpdateContestData, ContestsUpdateContestResponse, ContestsDeleteContestData, ContestsDeleteContestResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProblemsReadProblemsData, ProblemsReadProblemsResponse, ProblemsCreateProblemData, ProblemsCreateProblemResponse, ProblemsReadProblemData, ProblemsReadProblemResponse, ProblemsUpdateProblemData, ProblemsUpdateProblemResponse, ProblemsDeleteProblemData, ProblemsDeleteProblemResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ContestProblemsCreateContestProblemsData, ContestProblemsCreateContestProblemsResponse, ContestProblemsUpdateContestProblemsData, ContestProblemsUpdateContestProblemsResponse, ContestProblemsDeleteContestProblemsData, ContestProblemsDeleteContestProblemsResponse, ContestsReadContestsData, ContestsReadContestsResponse, ContestsCreateContestData, ContestsCreateContestResponse, ContestsReadAvailableContestsData, ContestsReadAvailableContestsResponse, ContestsReadContestProblemsData, ContestsReadContestProblemsResponse, ContestsReadContestData, ContestsReadContestResponse, ContestsUpdateContestData, ContestsUpdateContestResponse, ContestsDeleteContestData, ContestsDeleteContestResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProblemsReadProblemsData, ProblemsReadProblemsResponse, ProblemsCreateProblemData, ProblemsCreateProblemResponse, ProblemsReadProblemData, ProblemsReadProblemResponse, ProblemsUpdateProblemData, ProblemsUpdateProblemResponse, ProblemsDeleteProblemData, ProblemsDeleteProblemResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ContestProblemsService {
     /**
@@ -112,6 +112,50 @@ export class ContestsService {
             url: '/api/v1/contests/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Available Contests
+     * Retrieve contests that may become visible to regular users.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ContestSummariesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readAvailableContests(data: ContestsReadAvailableContestsData = {}): CancelablePromise<ContestsReadAvailableContestsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/contests/available',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Contest Problems
+     * Retrieve problems for an ongoing contest.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ContestProblemsListPublic Successful Response
+     * @throws ApiError
+     */
+    public static readContestProblems(data: ContestsReadContestProblemsData): CancelablePromise<ContestsReadContestProblemsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/contests/{id}/problems',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }

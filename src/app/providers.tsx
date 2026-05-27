@@ -21,7 +21,7 @@ OpenAPI.TOKEN = async () => {
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => {
     const handleApiError = (error: Error) => {
-      if (error instanceof ApiError && [401, 403].includes(error.status)) {
+      if (error instanceof ApiError && error.status === 401) {
         if (typeof window !== "undefined") {
           localStorage.removeItem("access_token")
           window.location.href = "/login"
