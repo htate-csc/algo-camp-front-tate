@@ -919,7 +919,7 @@ function ProblemSolveView({
                 <span className="text-sm font-medium">比較結果</span>
                 {isEvaluating ? (
                   <div className="rounded-md border bg-muted/20 p-4 text-sm text-muted-foreground">
-                    AIコードを判定しています...
+                    ３者のコードを評価しています...
                   </div>
                 ) : hasComparison ? (
                   <div className="space-y-4">
@@ -933,7 +933,7 @@ function ProblemSolveView({
                       <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
                         <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                           <Cpu className="h-4 w-4 animate-pulse" />
-                          <span>AI Coach Review (Claude 3.5 Sonnet)</span>
+                          <span>AI Coach レビュー (Claude 4.5 Sonnet)</span>
                           {isCommentLoading && (
                             <span className="text-[10px] text-muted-foreground animate-pulse ml-auto">
                               レビュー作成中...
