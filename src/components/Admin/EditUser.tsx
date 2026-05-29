@@ -7,7 +7,6 @@ import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogClose,
@@ -33,18 +32,17 @@ import { handleError } from "@/utils"
 
 const formSchema = z
   .object({
-    login_id: z.string().min(1, { message: "Login ID is required" }),
+    login_id: z.string().min(1, { message: "ログインIDは必須です" }),
     full_name: z.string().optional(),
     password: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters" })
+      .min(8, { message: "ログインパスワードは8文字以上で入力してください" })
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
-    is_superuser: z.boolean().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirm_password, {
-    message: "The passwords don't match",
+    message: "ログインパスワードが一致しません",
     path: ["confirm_password"],
   })
 
@@ -66,7 +64,6 @@ const EditUser = ({ user }: EditUserProps) => {
     defaultValues: {
       login_id: user.login_id,
       full_name: user.full_name ?? undefined,
-      is_superuser: user.is_superuser,
     },
   })
 
@@ -116,11 +113,11 @@ const EditUser = ({ user }: EditUserProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Login ID <span className="text-destructive">*</span>
+                      ログインID <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Login ID"
+                        placeholder="ログインID"
                         type="text"
                         {...field}
                         required
@@ -136,9 +133,9 @@ const EditUser = ({ user }: EditUserProps) => {
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>ユーザ名</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full name" type="text" {...field} />
+                      <Input placeholder="ユーザ名" type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,10 +147,10 @@ const EditUser = ({ user }: EditUserProps) => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Password</FormLabel>
+                    <FormLabel>ログインパスワード</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder="ログインパスワード"
                         type="password"
                         autoComplete="new-password"
                         {...field}
@@ -169,32 +166,16 @@ const EditUser = ({ user }: EditUserProps) => {
                 name="confirm_password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>ログインパスワード（再入力）</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder="ログインパスワード（再入力）"
                         type="password"
                         autoComplete="new-password"
                         {...field}
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
                   </FormItem>
                 )}
               />
