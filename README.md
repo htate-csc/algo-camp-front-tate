@@ -15,8 +15,8 @@
 
 ## 前提
 
-- Node.js
-- npm
+- Node.js 18.18.0 以上 (推奨: v20.x または v22.x、動作確認済み: v24.15.0)
+- npm 10.x 以上
 - バックエンド: [algo-camp-api-tate](https://github.com/htate-csc/algo-camp-api-tate)
 
 ## セットアップ
