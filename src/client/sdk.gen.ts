@@ -3,7 +3,75 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ContestProblemsCreateContestProblemsData, ContestProblemsCreateContestProblemsResponse, ContestProblemsUpdateContestProblemsData, ContestProblemsUpdateContestProblemsResponse, ContestProblemsDeleteContestProblemsData, ContestProblemsDeleteContestProblemsResponse, ContestsReadContestsData, ContestsReadContestsResponse, ContestsCreateContestData, ContestsCreateContestResponse, ContestsReadAvailableContestsData, ContestsReadAvailableContestsResponse, ContestsReadContestProblemsData, ContestsReadContestProblemsResponse, ContestsReadContestData, ContestsReadContestResponse, ContestsUpdateContestData, ContestsUpdateContestResponse, ContestsDeleteContestData, ContestsDeleteContestResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProblemsReadProblemsData, ProblemsReadProblemsResponse, ProblemsCreateProblemData, ProblemsCreateProblemResponse, ProblemsReadProblemData, ProblemsReadProblemResponse, ProblemsUpdateProblemData, ProblemsUpdateProblemResponse, ProblemsDeleteProblemData, ProblemsDeleteProblemResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AiBattlesCreateAiBattleData, AiBattlesCreateAiBattleResponse, AiBattlesReadAiBattleData, AiBattlesReadAiBattleResponse, AiBattlesSaveGeneratedCodeData, AiBattlesSaveGeneratedCodeResponse, ContestProblemsCreateContestProblemsData, ContestProblemsCreateContestProblemsResponse, ContestProblemsUpdateContestProblemsData, ContestProblemsUpdateContestProblemsResponse, ContestProblemsDeleteContestProblemsData, ContestProblemsDeleteContestProblemsResponse, ContestsReadContestsData, ContestsReadContestsResponse, ContestsCreateContestData, ContestsCreateContestResponse, ContestsReadAvailableContestsData, ContestsReadAvailableContestsResponse, ContestsReadContestProblemsData, ContestsReadContestProblemsResponse, ContestsReadContestData, ContestsReadContestResponse, ContestsUpdateContestData, ContestsUpdateContestResponse, ContestsDeleteContestData, ContestsDeleteContestResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProblemsReadProblemsData, ProblemsReadProblemsResponse, ProblemsCreateProblemData, ProblemsCreateProblemResponse, ProblemsReadProblemData, ProblemsReadProblemResponse, ProblemsUpdateProblemData, ProblemsUpdateProblemResponse, ProblemsDeleteProblemData, ProblemsDeleteProblemResponse, SubmissionsCreateSubmissionData, SubmissionsCreateSubmissionResponse, SubmissionsReadMyProblemSubmissionsData, SubmissionsReadMyProblemSubmissionsResponse, SubmissionsReadSubmissionData, SubmissionsReadSubmissionResponse, SubmissionsReadUnlockStatusData, SubmissionsReadUnlockStatusResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class AiBattlesService {
+    /**
+     * Create Ai Battle
+     * @param data The data for the request.
+     * @param data.problemId
+     * @param data.requestBody
+     * @returns AIBattlePublic Successful Response
+     * @throws ApiError
+     */
+    public static createAiBattle(data: AiBattlesCreateAiBattleData): CancelablePromise<AiBattlesCreateAiBattleResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/problems/{problem_id}/ai-battles',
+            path: {
+                problem_id: data.problemId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Ai Battle
+     * @param data The data for the request.
+     * @param data.battleId
+     * @returns AIBattlePublic Successful Response
+     * @throws ApiError
+     */
+    public static readAiBattle(data: AiBattlesReadAiBattleData): CancelablePromise<AiBattlesReadAiBattleResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/ai-battles/{battle_id}',
+            path: {
+                battle_id: data.battleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Save Generated Code
+     * @param data The data for the request.
+     * @param data.battleId
+     * @param data.requestBody
+     * @returns AIBattleParticipantPublic Successful Response
+     * @throws ApiError
+     */
+    public static saveGeneratedCode(data: AiBattlesSaveGeneratedCodeData): CancelablePromise<AiBattlesSaveGeneratedCodeResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/ai-battles/{battle_id}/generated-code',
+            path: {
+                battle_id: data.battleId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ContestProblemsService {
     /**
@@ -389,6 +457,97 @@ export class ProblemsService {
             url: '/api/v1/problems/{id}',
             path: {
                 id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class SubmissionsService {
+    /**
+     * Create Submission
+     * @param data The data for the request.
+     * @param data.problemId
+     * @param data.requestBody
+     * @returns SubmissionPublic Successful Response
+     * @throws ApiError
+     */
+    public static createSubmission(data: SubmissionsCreateSubmissionData): CancelablePromise<SubmissionsCreateSubmissionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/problems/{problem_id}/submissions',
+            path: {
+                problem_id: data.problemId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read My Problem Submissions
+     * @param data The data for the request.
+     * @param data.problemId
+     * @param data.skip
+     * @param data.limit
+     * @returns SubmissionsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readMyProblemSubmissions(data: SubmissionsReadMyProblemSubmissionsData): CancelablePromise<SubmissionsReadMyProblemSubmissionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/problems/{problem_id}/submissions/me',
+            path: {
+                problem_id: data.problemId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Submission
+     * @param data The data for the request.
+     * @param data.submissionId
+     * @returns SubmissionPublic Successful Response
+     * @throws ApiError
+     */
+    public static readSubmission(data: SubmissionsReadSubmissionData): CancelablePromise<SubmissionsReadSubmissionResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/submissions/{submission_id}',
+            path: {
+                submission_id: data.submissionId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Unlock Status
+     * @param data The data for the request.
+     * @param data.problemId
+     * @returns UnlockStatusPublic Successful Response
+     * @throws ApiError
+     */
+    public static readUnlockStatus(data: SubmissionsReadUnlockStatusData): CancelablePromise<SubmissionsReadUnlockStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/problems/{problem_id}/unlock-status',
+            path: {
+                problem_id: data.problemId
             },
             errors: {
                 422: 'Validation Error'

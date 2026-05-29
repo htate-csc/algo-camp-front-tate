@@ -1,15 +1,22 @@
 "use client"
 
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query"
 import { ArrowLeft, Calendar, Clock, Cpu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
 
 import {
+  AiBattlesService,
   type ContestProblemsPublic,
   type ContestSummaryPublic,
   ContestsService,
   ProblemsService,
+  type SubmissionPublic,
+  SubmissionsService,
 } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { ongoingOrFinishedColumns } from "@/components/Contest/columns"
@@ -31,12 +38,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { type JudgeResult, Stepper } from "@/components/ui/stepper"
+import {
+  type JudgeResult,
+  type StepItem,
+  Stepper,
+} from "@/components/ui/stepper"
 import { Textarea } from "@/components/ui/textarea"
 import useAuth from "@/hooks/useAuth"
 import useContestBoundaryClock from "@/hooks/useContestBoundaryClock"
-import { usePaizaRunner } from "@/hooks/usePaizaRunner"
 import { cn } from "@/lib/utils"
+import { extractPythonCodeFromText } from "@/lib/wa-rev/aiPrompt"
 
 const LANGUAGES = [
   { value: "c", label: "C" },
@@ -53,44 +64,529 @@ const LANGUAGES = [
   { value: "typescript", label: "TypeScript" },
 ]
 
+const WA_REV_MODEL_IDS = [
+  process.env.NEXT_PUBLIC_WA_REV_MODEL_1 || "claude-sonnet-4-5",
+  process.env.NEXT_PUBLIC_WA_REV_MODEL_2 || "claude-haiku-4-5",
+]
+
+type AiGenerationState = {
+  modelId: string
+  rawText: string
+  code: string
+  isStreaming: boolean
+  isEvaluating: boolean
+  error: string | null
+  submission: SubmissionPublic | null
+}
+
+function createInitialAiGenerations(): AiGenerationState[] {
+  return WA_REV_MODEL_IDS.map((modelId) => ({
+    modelId,
+    rawText: "",
+    code: "",
+    isStreaming: false,
+    isEvaluating: false,
+    error: null,
+    submission: null,
+  }))
+}
+
+interface EditorMockupProps {
+  title: string
+  value: string
+  theme: "user" | "ai1" | "ai2"
+  placeholder?: string
+}
+
+function EditorMockup({ title, value, theme, placeholder }: EditorMockupProps) {
+  const themes = {
+    user: {
+      bg: "bg-slate-950",
+      border: "border-slate-800",
+      text: "text-slate-100",
+      accent: "bg-slate-800",
+      tabText: "text-slate-200",
+      dot: "bg-slate-500",
+    },
+    ai1: {
+      bg: "bg-indigo-950/70",
+      border: "border-indigo-900/60",
+      text: "text-indigo-100",
+      accent: "bg-indigo-900/40",
+      tabText: "text-indigo-200",
+      dot: "bg-indigo-500",
+    },
+    ai2: {
+      bg: "bg-emerald-950/70",
+      border: "border-emerald-900/60",
+      text: "text-emerald-100",
+      accent: "bg-emerald-900/40",
+      tabText: "text-emerald-200",
+      dot: "bg-emerald-500",
+    },
+  }
+
+  const currentTheme = themes[theme]
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-lg border overflow-hidden shadow-xl",
+        currentTheme.border,
+      )}
+    >
+      {/* Editor Title Bar / Tab Bar */}
+      <div
+        className={cn(
+          "flex items-center justify-between px-3 py-2 text-xs select-none border-b",
+          currentTheme.border,
+          "bg-black/20",
+        )}
+      >
+        <div className="flex items-center gap-1.5 w-16">
+          <span className="w-2 h-2 rounded-full bg-rose-500/80" />
+          <span className="w-2 h-2 rounded-full bg-amber-500/80" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
+        </div>
+
+        <div
+          className={cn(
+            "flex items-center gap-2 px-3 py-1 rounded-t-md font-mono text-[10px] font-medium border-t border-x -mb-2.5",
+            currentTheme.bg,
+            currentTheme.border,
+            currentTheme.tabText,
+          )}
+        >
+          <span className={cn("w-1.5 h-1.5 rounded-full", currentTheme.dot)} />
+          <span>solution.py</span>
+        </div>
+
+        <div className="text-[9px] font-mono text-muted-foreground tracking-wider uppercase">
+          {title}
+        </div>
+      </div>
+
+      <div className="relative flex-1 flex min-h-[400px]">
+        {/* Fake gutter */}
+        <div
+          className={cn(
+            "w-9 border-r font-mono text-[10px] text-right pr-2 py-4 select-none leading-relaxed flex flex-col gap-0",
+            currentTheme.border,
+            "bg-black/10 text-muted-foreground/30",
+          )}
+        >
+          {Array.from({ length: 25 }).map((_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
+
+        <textarea
+          value={value}
+          readOnly
+          className={cn(
+            "flex-1 font-mono text-[11px] leading-relaxed p-4 border-0 focus:ring-0 focus:outline-none resize-none overflow-auto min-h-[400px] max-h-[500px]",
+            currentTheme.bg,
+            currentTheme.text,
+          )}
+          placeholder={placeholder}
+          spellCheck={false}
+        />
+      </div>
+    </div>
+  )
+}
+
 interface ProblemSolveViewProps {
   problemId: string
+  contestId: string
   onBack: () => void
 }
 
-function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
+function ProblemSolveView({
+  problemId,
+  contestId,
+  onBack,
+}: ProblemSolveViewProps) {
   const { data: problem, isLoading } = useQuery({
     queryKey: ["problem", problemId],
     queryFn: () => ProblemsService.readProblem({ id: problemId }),
   })
+  const queryClient = useQueryClient()
 
   const [selectedLanguage, setSelectedLanguage] = useState("python3")
   const [code, setCode] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false)
   const [lastResults, setLastResults] = useState<(JudgeResult | null)[]>([])
+  const [steps, setSteps] = useState<StepItem[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState("")
+  const [aiGenerations, setAiGenerations] = useState<AiGenerationState[]>(
+    createInitialAiGenerations(),
+  )
+  const [_isComparisonLoading, setIsComparisonLoading] = useState(false)
+  const [comparisonUserSubmission, setComparisonUserSubmission] =
+    useState<SubmissionPublic | null>(null)
+  const [userSourceCode, setUserSourceCode] = useState<string>("")
+  const [evalComment, setEvalComment] = useState<string>("")
+  const [isCommentLoading, setIsCommentLoading] = useState<boolean>(false)
 
-  const { steps, isRunning, runSubmission, cancelSubmission } = usePaizaRunner()
+  const isAiStreaming = aiGenerations.some((g) => g.isStreaming)
+  const isEvaluating = aiGenerations.some((g) => g.isEvaluating)
+  const hasFinished = aiGenerations.every(
+    (g) => !g.isStreaming && !g.isEvaluating && (g.submission || g.error),
+  )
+  const hasComparison = !!comparisonUserSubmission && hasFinished
+
+  const { data: unlockStatus } = useQuery({
+    queryKey: ["problem", problemId, "unlock-status"],
+    queryFn: () => SubmissionsService.readUnlockStatus({ problemId }),
+    enabled: !!problem,
+  })
+
+  const { data: submissionsData } = useQuery({
+    queryKey: ["problem", problemId, "submissions", "me"],
+    queryFn: () => SubmissionsService.readMyProblemSubmissions({ problemId }),
+    enabled: !!problem && !!unlockStatus?.unlocked,
+  })
+
+  const acPythonSubmissions = (submissionsData?.data || []).filter(
+    (submission) =>
+      submission.verdict === "AC" && submission.language === "python3",
+  )
 
   const handleSubmit = async () => {
     if (!problem || !code) return
     setIsDialogOpen(true)
-    const results = await runSubmission({
-      code,
-      language: selectedLanguage,
-      samples: problem.samples || [],
-      timeLimitMs: problem.time_limit || 2000,
-      memoryLimitGb: problem.memory_limit || 1,
-    })
-    if (results) {
-      setLastResults(results)
+    setIsRunning(true)
+    const initialSteps: StepItem[] = Array.from({ length: 3 }).map(
+      (_, index) => ({
+        id: `case-${index}`,
+        title: `テストケース ${index + 1}`,
+        status: "running",
+      }),
+    )
+    setSteps(initialSteps)
+
+    try {
+      const submission = await SubmissionsService.createSubmission({
+        problemId,
+        requestBody: {
+          contest_id: contestId,
+          language: selectedLanguage,
+          source_code: code,
+        },
+      })
+      const caseResults = submission.case_results || []
+      const nextSteps: StepItem[] = caseResults.map((caseResult) => ({
+        id: caseResult.id,
+        title: `テストケース ${caseResult.case_index + 1}`,
+        status: caseResult.verdict === "AC" ? "success" : "error",
+        result: caseResult.verdict as JudgeResult,
+        time:
+          caseResult.time_ms === null || caseResult.time_ms === undefined
+            ? undefined
+            : caseResult.time_ms / 1000,
+        memory:
+          caseResult.memory_kb === null || caseResult.memory_kb === undefined
+            ? undefined
+            : caseResult.memory_kb * 1024,
+      }))
+      setSteps(nextSteps)
+      setLastResults(nextSteps.map((step) => step.result || null))
+      queryClient.invalidateQueries({
+        queryKey: ["problem", problemId, "unlock-status"],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["problem", problemId, "submissions", "me"],
+      })
+    } catch (error) {
+      console.error("Submission failed:", error)
+      setSteps(
+        initialSteps.map((step) => ({
+          ...step,
+          status: "error",
+          result: "RE",
+        })),
+      )
+      setLastResults(initialSteps.map(() => "RE"))
+    } finally {
+      setIsRunning(false)
     }
   }
 
   const handleCloseDialog = () => {
-    if (isRunning) {
-      cancelSubmission()
-    }
+    if (isRunning) return
     setIsDialogOpen(false)
+  }
+
+  const handleOpenAiDialog = () => {
+    setSelectedSubmissionId(acPythonSubmissions[0]?.id || "")
+    setAiGenerations(createInitialAiGenerations())
+    setIsComparisonLoading(false)
+    setComparisonUserSubmission(null)
+    setUserSourceCode("")
+    setEvalComment("")
+    setIsCommentLoading(false)
+    setIsAiDialogOpen(true)
+  }
+
+  const handleStartAiBattle = async () => {
+    if (!problem || !selectedSubmissionId) return
+
+    console.group("[WA Rev] AI battle")
+    console.info("[WA Rev] start", {
+      problemId,
+      contestId,
+      selectedSubmissionId,
+      modelIds: WA_REV_MODEL_IDS,
+    })
+
+    let userSub: SubmissionPublic | null = null
+
+    setAiGenerations((prev) =>
+      prev.map((g) => ({
+        ...g,
+        isStreaming: true,
+        isEvaluating: false,
+        error: null,
+        rawText: "",
+        code: "",
+        submission: null,
+      })),
+    )
+    setIsComparisonLoading(false)
+    setComparisonUserSubmission(null)
+
+    try {
+      // Fetch user submission to get source code
+      userSub = await SubmissionsService.readSubmission({
+        submissionId: selectedSubmissionId,
+      })
+      setUserSourceCode(userSub.source_code || "")
+      setComparisonUserSubmission(userSub)
+    } catch (e) {
+      console.warn("Could not fetch user submission code", e)
+    }
+
+    try {
+      console.info("[WA Rev] creating battle")
+      const battle = await AiBattlesService.createAiBattle({
+        problemId,
+        requestBody: {
+          contest_id: contestId,
+          user_submission_id: selectedSubmissionId,
+          models: WA_REV_MODEL_IDS,
+        },
+      })
+      console.info("[WA Rev] battle created", battle)
+
+      const aiParticipants =
+        battle.participants?.filter(
+          (participant) => participant.participant_type === "ai",
+        ) || []
+
+      if (aiParticipants.length === 0) {
+        throw new Error("AI participants were not created")
+      }
+
+      const token =
+        typeof window === "undefined"
+          ? ""
+          : localStorage.getItem("access_token") || ""
+
+      // start parallel generations
+      await Promise.all(
+        aiParticipants.map(async (aiParticipant) => {
+          const modelId = aiParticipant.model_id
+          if (!modelId) return
+
+          try {
+            console.info("[WA Rev] requesting stream", {
+              battleId: battle.id,
+              modelId,
+              hasToken: !!token,
+            })
+            const response = await fetch(
+              `/api/wa-rev/ai-battles/${battle.id}/stream`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                  participant_id: aiParticipant.id,
+                  model_id: modelId,
+                  problem: {
+                    name: problem.name,
+                    content: problem.content,
+                    input_format: problem.input_format,
+                    output_format: problem.output_format,
+                    samples: problem.samples,
+                  },
+                }),
+              },
+            )
+
+            if (!response.ok || !response.body) {
+              throw new Error(`AI code generation failed for ${modelId}`)
+            }
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let rawGeneratedText = ""
+
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+              const chunk = decoder.decode(value, { stream: true })
+              rawGeneratedText += chunk
+              setAiGenerations((prev) =>
+                prev.map((g) =>
+                  g.modelId === modelId
+                    ? {
+                        ...g,
+                        rawText: rawGeneratedText,
+                        code: extractPythonCodeFromText(rawGeneratedText),
+                      }
+                    : g,
+                ),
+              )
+            }
+
+            const finalChunk = decoder.decode()
+            rawGeneratedText += finalChunk
+            const sourceCode =
+              extractPythonCodeFromText(rawGeneratedText).trim() ||
+              rawGeneratedText.trim()
+
+            setAiGenerations((prev) =>
+              prev.map((g) =>
+                g.modelId === modelId
+                  ? {
+                      ...g,
+                      rawText: rawGeneratedText,
+                      code: extractPythonCodeFromText(rawGeneratedText),
+                    }
+                  : g,
+              ),
+            )
+
+            // Start evaluation for this model
+            setAiGenerations((prev) =>
+              prev.map((g) =>
+                g.modelId === modelId
+                  ? { ...g, isStreaming: false, isEvaluating: true }
+                  : g,
+              ),
+            )
+
+            const evaluatedAiParticipant =
+              await AiBattlesService.saveGeneratedCode({
+                battleId: battle.id,
+                requestBody: {
+                  participant_id: aiParticipant.id,
+                  model_id: modelId,
+                  source_code: sourceCode,
+                  finish_reason: "stop",
+                },
+              })
+
+            if (!evaluatedAiParticipant?.submission_id) {
+              throw new Error("AI submission was not evaluated")
+            }
+
+            const aiSubmission = await SubmissionsService.readSubmission({
+              submissionId: evaluatedAiParticipant.submission_id,
+            })
+
+            setAiGenerations((prev) =>
+              prev.map((g) =>
+                g.modelId === modelId
+                  ? { ...g, isEvaluating: false, submission: aiSubmission }
+                  : g,
+              ),
+            )
+          } catch (error) {
+            console.error(`AI battle failed for ${modelId}:`, error)
+            setAiGenerations((prev) =>
+              prev.map((g) =>
+                g.modelId === modelId
+                  ? {
+                      ...g,
+                      isStreaming: false,
+                      isEvaluating: false,
+                      error:
+                        error instanceof Error
+                          ? error.message
+                          : "AI code generation failed",
+                    }
+                  : g,
+              ),
+            )
+          }
+        }),
+      )
+
+      queryClient.invalidateQueries({ queryKey: ["ai-battle", battle.id] })
+
+      // Generate AI review comment
+      const finalUserSub = comparisonUserSubmission || userSub
+      const ai1Sub = aiGenerations[0]?.submission
+      const ai2Sub = aiGenerations[1]?.submission
+
+      const metricsStr = `
+- 判定: 自分=${finalUserSub?.verdict}, AI 1=${ai1Sub?.verdict}, AI 2=${ai2Sub?.verdict}
+- 実行時間: 自分=${finalUserSub?.total_time_ms}ms, AI 1=${ai1Sub?.total_time_ms}ms, AI 2=${ai2Sub?.total_time_ms}ms
+- メモリ: 自分=${finalUserSub?.peak_memory_kb}KB, AI 1=${ai1Sub?.peak_memory_kb}KB, AI 2=${ai2Sub?.peak_memory_kb}KB
+- コードサイズ: 自分=${finalUserSub?.code_bytes}B, AI 1=${ai1Sub?.code_bytes}B, AI 2=${ai2Sub?.code_bytes}B
+`
+
+      setEvalComment("")
+      setIsCommentLoading(true)
+      try {
+        const commentResponse = await fetch(
+          `/api/wa-rev/ai-battles/${battle.id}/comment`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({
+              userCode: userSub?.source_code || "",
+              ai1Code: aiGenerations[0]?.code || "",
+              ai2Code: aiGenerations[1]?.code || "",
+              metricsSummary: metricsStr,
+            }),
+          },
+        )
+
+        if (commentResponse.ok && commentResponse.body) {
+          const commentReader = commentResponse.body.getReader()
+          const commentDecoder = new TextDecoder()
+          while (true) {
+            const { done, value } = await commentReader.read()
+            if (done) break
+            const chunk = commentDecoder.decode(value, { stream: true })
+            setEvalComment((prev) => prev + chunk)
+          }
+          const finalChunk = commentDecoder.decode()
+          setEvalComment((prev) => prev + finalChunk)
+        }
+      } catch (commentErr) {
+        console.error("AI review comment generation failed:", commentErr)
+      } finally {
+        setIsCommentLoading(false)
+      }
+    } catch (error) {
+      console.error("AI battle failed:", error)
+      // We can just log it or set a global error if needed.
+    } finally {
+      console.info("[WA Rev] finished")
+      console.groupEnd()
+    }
   }
 
   return (
@@ -281,13 +777,25 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
                   </>
                 )}
               </div>
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={!code || isRunning}
-              >
-                提出する
-              </Button>
+              <div className="flex items-center gap-2">
+                {unlockStatus?.unlocked && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenAiDialog}
+                    disabled={acPythonSubmissions.length === 0 || isRunning}
+                  >
+                    AIと競う
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={handleSubmit}
+                  disabled={!code || isRunning}
+                >
+                  提出する
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -311,7 +819,7 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
             </DialogTitle>
             <DialogDescription>
               {isRunning
-                ? "Paiza.io APIを使用して、テストケースを実行しています。"
+                ? "提出コードを判定しています。"
                 : "すべてのテストケースの実行が完了しました。"}
             </DialogDescription>
           </DialogHeader>
@@ -342,8 +850,350 @@ function ProblemSolveView({ problemId, onBack }: ProblemSolveViewProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={isAiDialogOpen}
+        onOpenChange={(open) => {
+          if (!isAiStreaming) setIsAiDialogOpen(open)
+        }}
+      >
+        <DialogContent
+          className="sm:max-w-[95vw] w-full max-h-[90vh] overflow-y-auto"
+          showCloseButton={!isAiStreaming}
+        >
+          <DialogHeader>
+            <DialogTitle>AIと競う</DialogTitle>
+            <DialogDescription>
+              AC済みのPython 3提出を選び、Claudeに解答コードを生成させます。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <span className="text-sm font-medium">代表提出</span>
+              <Select
+                value={selectedSubmissionId}
+                onValueChange={setSelectedSubmissionId}
+                disabled={isAiStreaming}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="提出を選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {acPythonSubmissions.map((submission: SubmissionPublic) => (
+                    <SelectItem key={submission.id} value={submission.id}>
+                      {formatSubmissionLabel(submission)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 自分 */}
+              <EditorMockup
+                title="自分 (Python 3)"
+                value={userSourceCode}
+                theme="user"
+                placeholder="代表提出を選択してください..."
+              />
+
+              {/* AI 1, AI 2 */}
+              {aiGenerations.map((g, idx) => (
+                <EditorMockup
+                  key={g.modelId}
+                  title={`AI ${idx + 1} (${g.modelId})`}
+                  value={g.code || g.rawText}
+                  theme={idx === 0 ? "ai1" : "ai2"}
+                  placeholder={
+                    g.isStreaming || g.rawText
+                      ? "コード生成中..."
+                      : "生成開始後、ここにコードが表示されます。"
+                  }
+                />
+              ))}
+            </div>
+
+            {(hasComparison || isEvaluating) && (
+              <div className="grid gap-2 mt-4">
+                <span className="text-sm font-medium">比較結果</span>
+                {isEvaluating ? (
+                  <div className="rounded-md border bg-muted/20 p-4 text-sm text-muted-foreground">
+                    AIコードを判定しています...
+                  </div>
+                ) : hasComparison ? (
+                  <div className="space-y-4">
+                    <SubmissionComparison
+                      userSubmission={comparisonUserSubmission}
+                      aiGenerations={aiGenerations}
+                    />
+
+                    {/* AI Coach Review Comment */}
+                    {(evalComment || isCommentLoading) && (
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                          <Cpu className="h-4 w-4 animate-pulse" />
+                          <span>AI Coach Review (Claude 3.5 Sonnet)</span>
+                          {isCommentLoading && (
+                            <span className="text-[10px] text-muted-foreground animate-pulse ml-auto">
+                              レビュー作成中...
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-foreground/90 leading-relaxed font-sans whitespace-pre-wrap">
+                          {evalComment || "レビューを生成しています..."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsAiDialogOpen(false)}
+              disabled={isAiStreaming}
+            >
+              閉じる
+            </Button>
+            <Button
+              onClick={handleStartAiBattle}
+              disabled={!selectedSubmissionId || isAiStreaming}
+            >
+              {isAiStreaming ? "生成中..." : "生成開始"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
+}
+
+function SubmissionComparison({
+  userSubmission,
+  aiGenerations,
+}: {
+  userSubmission: SubmissionPublic
+  aiGenerations: AiGenerationState[]
+}) {
+  const getAiCell = (
+    aiIdx: number,
+    valueFn: (sub: SubmissionPublic) => string | null,
+    deltaFn?: (sub: SubmissionPublic) => string,
+  ) => {
+    const gen = aiGenerations[aiIdx]
+    if (!gen) return "-"
+    if (gen.error) return "エラー"
+    if (!gen.submission) return "-"
+
+    const val = valueFn(gen.submission)
+    if (val === null) return "-"
+
+    const delta = deltaFn ? deltaFn(gen.submission) : ""
+    return delta ? `${val} (${delta})` : val
+  }
+
+  const rows = [
+    {
+      label: "判定",
+      user: userSubmission.verdict,
+      ai1: getAiCell(0, (sub) => sub.verdict),
+      ai2: getAiCell(1, (sub) => sub.verdict),
+    },
+    {
+      label: "実行時間",
+      user: formatNullableMetric(userSubmission.total_time_ms, "ms"),
+      ai1: getAiCell(
+        0,
+        (sub) => formatNullableMetric(sub.total_time_ms, "ms"),
+        (sub) =>
+          formatDelta(
+            userSubmission.total_time_ms,
+            sub.total_time_ms,
+            "ms",
+            false,
+          ),
+      ),
+      ai2: getAiCell(
+        1,
+        (sub) => formatNullableMetric(sub.total_time_ms, "ms"),
+        (sub) =>
+          formatDelta(
+            userSubmission.total_time_ms,
+            sub.total_time_ms,
+            "ms",
+            false,
+          ),
+      ),
+    },
+    {
+      label: "メモリ",
+      user: formatMemory(userSubmission.peak_memory_kb),
+      ai1: getAiCell(
+        0,
+        (sub) => formatMemory(sub.peak_memory_kb),
+        (sub) =>
+          formatDelta(
+            userSubmission.peak_memory_kb,
+            sub.peak_memory_kb,
+            "KB",
+            false,
+          ),
+      ),
+      ai2: getAiCell(
+        1,
+        (sub) => formatMemory(sub.peak_memory_kb),
+        (sub) =>
+          formatDelta(
+            userSubmission.peak_memory_kb,
+            sub.peak_memory_kb,
+            "KB",
+            false,
+          ),
+      ),
+    },
+    {
+      label: "コードサイズ",
+      user: formatNullableMetric(userSubmission.code_bytes, "bytes"),
+      ai1: getAiCell(
+        0,
+        (sub) => formatNullableMetric(sub.code_bytes, "bytes"),
+        (sub) =>
+          formatDelta(userSubmission.code_bytes, sub.code_bytes, "B", false),
+      ),
+      ai2: getAiCell(
+        1,
+        (sub) => formatNullableMetric(sub.code_bytes, "bytes"),
+        (sub) =>
+          formatDelta(userSubmission.code_bytes, sub.code_bytes, "B", false),
+      ),
+    },
+    {
+      label: "有効行数",
+      user: formatNullableMetric(userSubmission.effective_lines, "lines"),
+      ai1: getAiCell(
+        0,
+        (sub) => formatNullableMetric(sub.effective_lines, "lines"),
+        (sub) =>
+          formatDelta(
+            userSubmission.effective_lines,
+            sub.effective_lines,
+            "行",
+            false,
+          ),
+      ),
+      ai2: getAiCell(
+        1,
+        (sub) => formatNullableMetric(sub.effective_lines, "lines"),
+        (sub) =>
+          formatDelta(
+            userSubmission.effective_lines,
+            sub.effective_lines,
+            "行",
+            false,
+          ),
+      ),
+    },
+    {
+      label: "最大ネスト",
+      user: formatNullableMetric(userSubmission.max_nesting_depth, ""),
+      ai1: getAiCell(
+        0,
+        (sub) => formatNullableMetric(sub.max_nesting_depth, ""),
+        (sub) =>
+          formatDelta(
+            userSubmission.max_nesting_depth,
+            sub.max_nesting_depth,
+            "",
+            false,
+          ),
+      ),
+      ai2: getAiCell(
+        1,
+        (sub) => formatNullableMetric(sub.max_nesting_depth, ""),
+        (sub) =>
+          formatDelta(
+            userSubmission.max_nesting_depth,
+            sub.max_nesting_depth,
+            "",
+            false,
+          ),
+      ),
+    },
+  ]
+
+  return (
+    <div className="overflow-hidden rounded-md border">
+      <div className="grid grid-cols-[1fr_1fr_1.5fr_1.5fr] border-b bg-muted/40 px-3 py-2 text-xs font-semibold text-muted-foreground">
+        <span>指標</span>
+        <span>自分</span>
+        <span>AI 1</span>
+        <span>AI 2</span>
+      </div>
+      {rows.map((row) => (
+        <div
+          key={row.label}
+          className="grid grid-cols-[1fr_1fr_1.5fr_1.5fr] border-b px-3 py-2 text-xs last:border-b-0"
+        >
+          <span className="font-medium text-muted-foreground">{row.label}</span>
+          <span className="font-mono">{row.user}</span>
+          <span className="font-mono text-muted-foreground whitespace-pre-wrap">
+            {row.ai1}
+          </span>
+          <span className="font-mono text-muted-foreground whitespace-pre-wrap">
+            {row.ai2}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+function formatNullableMetric(value: number | null | undefined, unit: string) {
+  if (value === null || value === undefined) return "-"
+  return unit ? `${value}${unit}` : `${value}`
+}
+
+function formatMemory(value: number | null | undefined) {
+  if (value === null || value === undefined) return "-"
+  return `${(value / 1024).toFixed(1)}MB`
+}
+
+function formatDelta(
+  userValue: number | null | undefined,
+  aiValue: number | null | undefined,
+  unit: string,
+  lowerIsBetter: boolean,
+) {
+  if (userValue === null || userValue === undefined) return "-"
+  if (aiValue === null || aiValue === undefined) return "-"
+
+  const delta = aiValue - userValue
+  if (delta === 0) return "±0"
+
+  const sign = delta > 0 ? "+" : ""
+  const suffix = unit ? unit : ""
+  const marker = lowerIsBetter ? (delta < 0 ? "AI優位" : "自分優位") : ""
+  return `${sign}${delta}${suffix}${marker ? ` / ${marker}` : ""}`
+}
+
+function formatSubmissionLabel(submission: SubmissionPublic) {
+  const createdAt = submission.created_at
+    ? new Date(submission.created_at).toLocaleString()
+    : "日時不明"
+  const time =
+    submission.total_time_ms === null || submission.total_time_ms === undefined
+      ? "-"
+      : `${submission.total_time_ms}ms`
+  const memory =
+    submission.peak_memory_kb === null ||
+    submission.peak_memory_kb === undefined
+      ? "-"
+      : `${(submission.peak_memory_kb / 1024).toFixed(1)}MB`
+
+  return `${createdAt} / ${time} / ${memory}`
 }
 
 function ProblemsList({
@@ -472,6 +1322,7 @@ function Dashboard() {
     return (
       <ProblemSolveView
         problemId={selectedProblemId}
+        contestId={selectedContest.id}
         onBack={() => setSelectedProblemId(null)}
       />
     )
